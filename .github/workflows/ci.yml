@@ -21,13 +21,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
 
       - name: Run Core Verification Tests
-        run: node --experimental-strip-types packages/core/tests/verify.ts
+        run: pnpm run test:verify
 
       - name: Build All Packages
         run: pnpm run build
