@@ -6,7 +6,7 @@ import type {
 } from '../types.ts';
 import { parseColorString } from '../parser/smart-paste.ts';
 import { getContrastReport, autoFixContrast } from '../a11y/contrast.ts';
-import { isOklchOutOfSrgbGamut, clampOklchToSrgb } from '../gamut/clamp.ts';
+import { isOklchOutOfSrgbGamut } from '../gamut/clamp.ts';
 import {
   createDefaultGradient,
   addGradientStop,

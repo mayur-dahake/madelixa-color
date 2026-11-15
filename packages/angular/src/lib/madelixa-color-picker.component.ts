@@ -26,11 +26,9 @@ import {
   ColorStore,
   createColorStore,
   ColorSpace,
-  OklchColor,
   oklchToRgb,
   rgbToHex,
-  getRelativeLuminance,
-  formatColor
+  getRelativeLuminance
 } from '@madelixa/color-core';
 import { PointerGestureController, setupPopoverPositioning } from '@madelixa/color-dom';
 import { ColorPickerControl } from './color-picker.control';
@@ -525,8 +523,8 @@ export class MadelixaColorPickerComponent
   readonly store: ColorStore;
   private pointerGesture?: PointerGestureController;
   private cleanupPopover?: () => void;
-  private onChange: (val: string) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (val: string) => void = () => { };
+  private onTouched: () => void = () => { };
 
   readonly swatchColumns = SWATCH_COLUMNS;
 

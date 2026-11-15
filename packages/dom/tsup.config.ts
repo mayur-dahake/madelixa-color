@@ -8,5 +8,6 @@ export default defineConfig({
   clean: true,
   minify: true,
   treeshake: true,
-  splitting: false
+  splitting: false,
+  onSuccess: 'mkdir -p dist && cp -r src/styles/* dist/'
 });

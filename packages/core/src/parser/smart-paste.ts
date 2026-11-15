@@ -1,5 +1,5 @@
 import type { OklchColor, ColorSpace } from '../types.ts';
-import { hexToRgb, rgbToHsl, hslToRgb } from '../conversions/srgb.ts';
+import { hexToRgb, hslToRgb } from '../conversions/srgb.ts';
 import { rgbToOklch } from '../conversions/oklch.ts';
 import { displayP3ToRgb } from '../conversions/p3.ts';
 

@@ -1,6 +1,6 @@
 import { LitElement, html, css, PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { ColorStore, createColorStore, ColorSpace, oklchToRgb, rgbToHex } from '@madelixa/color-core';
+import { ColorStore, createColorStore, ColorSpace, oklchToRgb } from '@madelixa/color-core';
 import { PointerGestureController, handleKeyboard2D } from '@madelixa/color-dom';
 
 /**
