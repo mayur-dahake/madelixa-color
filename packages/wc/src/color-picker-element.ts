@@ -1,7 +1,7 @@
 import { LitElement, html, css, PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ColorStore, createColorStore, ColorSpace, oklchToRgb } from '@madelixa/color-core';
-import { PointerGestureController, handleKeyboard2D } from '@madelixa/color-dom';
+import { PointerGestureController, handleSliderKeyNavigation } from '@madelixa/color-dom';
 
 /**
  * `<madelixa-color-picker>`
@@ -431,7 +431,7 @@ export class MadelixaColorPickerElement extends LitElement {
     }
   }
 
-  private togglePopover(): void {
+  private togglePickerPopover(): void {
     if (this.disabled) return;
     this.isOpen = !this.isOpen;
     if (this.isOpen) {
@@ -510,7 +510,7 @@ export class MadelixaColorPickerElement extends LitElement {
 
   private handleAlpha(e: Event): void {
     const val = parseFloat((e.target as HTMLInputElement).value);
-    this.store.dispatch({ type: 'SET_ALPHA', payload: val });
+    this.store.dispatch({ type: 'SET_OKLCH', payload: { alpha: val } });
   }
 
   private handleFormatChange(e: Event): void {
@@ -527,22 +527,18 @@ export class MadelixaColorPickerElement extends LitElement {
 
   private handleCanvasKeyDown(e: KeyboardEvent): void {
     const state = this.store.getState();
-    const currentCoords = {
-      x: state.currentOklch.c / 0.32,
-      y: 1.0 - state.currentOklch.l
-    };
-    const nextCoords = handleKeyboard2D(e, currentCoords);
-    if (nextCoords) {
-      e.preventDefault();
-      this.store.dispatch({
-        type: 'SET_OKLCH',
-        payload: {
-          c: nextCoords.x * 0.32,
-          l: 1.0 - nextCoords.y
-        }
-      });
-      this.renderCanvas();
-    }
+    handleSliderKeyNavigation(e, {
+      onStepX: (delta) => {
+        const nextC = Math.max(0, Math.min(0.32, state.currentOklch.c + delta * 0.32));
+        this.store.dispatch({ type: 'SET_OKLCH', payload: { c: nextC } });
+        this.renderCanvas();
+      },
+      onStepY: (delta) => {
+        const nextL = Math.max(0, Math.min(1.0, state.currentOklch.l + delta));
+        this.store.dispatch({ type: 'SET_OKLCH', payload: { l: nextL } });
+        this.renderCanvas();
+      }
+    });
   }
 
   private handleAutoFix(): void {
@@ -553,10 +549,11 @@ export class MadelixaColorPickerElement extends LitElement {
   render() {
     const state = this.store.getState();
     const hex = this.store.getFormatted('hex');
+    const rgb = oklchToRgb(state.currentOklch);
     const thumbX = Math.min(Math.max((state.currentOklch.c / 0.32) * 100, 0), 100);
     const thumbY = Math.min(Math.max((1.0 - state.currentOklch.l) * 100, 0), 100);
     const passesAA = state.contrast.passesAA;
-    const solidColor = `rgb(${state.currentRgb.r}, ${state.currentRgb.g}, ${state.currentRgb.b})`;
+    const solidColor = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
 
     return html`
       <div
@@ -565,7 +562,7 @@ export class MadelixaColorPickerElement extends LitElement {
         tabindex="${this.disabled ? -1 : 0}"
         aria-haspopup="dialog"
         aria-expanded="${this.isOpen}"
-        @click="${this.togglePopover}"
+        @click="${this.togglePickerPopover}"
       >
         <div class="swatch-btn">
           <div class="swatch-fill" style="background-color: ${hex};"></div>

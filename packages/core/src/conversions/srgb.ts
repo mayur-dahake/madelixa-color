@@ -31,7 +31,8 @@ export function hexToRgb(hex: string): RgbaColor {
   if (clean.length === 3) {
     clean = clean.split('').map(c => c + c).join('');
   } else if (clean.length === 4) {
-    const aHex = clean[3] + clean[3];
+    const aChar = clean[3] ?? 'f';
+    const aHex = aChar + aChar;
     alpha = parseInt(aHex, 16) / 255;
     clean = clean.slice(0, 3).split('').map(c => c + c).join('');
   } else if (clean.length === 8) {

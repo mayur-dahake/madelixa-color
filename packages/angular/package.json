@@ -1,6 +1,7 @@
 {
   "name": "@madelixa/color-angular",
   "version": "0.1.0",
+  "type": "module",
   "description": "Standalone Angular component with Signals, ControlValueAccessor, and 60fps drag optimization for Madelixa Color Picker",
   "author": "Mayur Dahake <mayur@madelixa.com>",
   "license": "MIT",
@@ -20,7 +21,8 @@
   "peerDependencies": {
     "@angular/common": ">=17.0.0",
     "@angular/core": ">=17.0.0",
-    "@angular/forms": ">=17.0.0"
+    "@angular/forms": ">=17.0.0",
+    "rxjs": "^7.4.0 || ^7.8.0"
   },
   "dependencies": {
     "@madelixa/color-core": "workspace:*",
@@ -30,6 +32,7 @@
     "@angular/common": "^19.1.5",
     "@angular/core": "^19.1.5",
     "@angular/forms": "^19.1.5",
+    "rxjs": "~7.8.0",
     "tsup": "^8.3.6",
     "typescript": "^5.7.3"
   },

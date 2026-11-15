@@ -41,7 +41,7 @@ export class ColorPickerControl {
       ]
     );
 
-    this.store.subscribe((state) => {
+    this.store.subscribe(() => {
       const formatted = this.store.getFormatted('hex');
       this.value.set(formatted);
       this._value$.next(formatted);

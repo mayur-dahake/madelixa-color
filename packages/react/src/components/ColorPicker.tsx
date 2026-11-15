@@ -24,8 +24,8 @@ import {
 export interface ColorPickerContextValue extends ReturnType<typeof useColorPicker> {
   isOpen: boolean;
   setIsOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
-  triggerRef: React.RefObject<HTMLButtonElement | null>;
-  popoverRef: React.RefObject<HTMLDivElement | null>;
+  triggerRef: React.RefObject<any>;
+  popoverRef: React.RefObject<any>;
   activeTab: 'solid' | 'gradient' | 'harmonies' | 'scales';
   setActiveTab: (tab: 'solid' | 'gradient' | 'harmonies' | 'scales') => void;
 }
@@ -55,8 +55,8 @@ export const ColorPickerRoot = forwardRef<HTMLDivElement, ColorPickerRootProps>(
     const [isOpen, setIsOpen] = useState(defaultOpen);
     const [activeTab, setActiveTab] = useState<'solid' | 'gradient' | 'harmonies' | 'scales'>('solid');
 
-    const triggerRef = useRef<HTMLButtonElement | null>(null);
-    const popoverRef = useRef<HTMLDivElement | null>(null);
+    const triggerRef = useRef<any>(null);
+    const popoverRef = useRef<any>(null);
 
     // Floating UI auto-positioning
     useEffect(() => {
@@ -67,6 +67,7 @@ export const ColorPickerRoot = forwardRef<HTMLDivElement, ColorPickerRootProps>(
           placement: 'bottom-start'
         });
       }
+      return undefined;
     }, [isOpen]);
 
     // Close on outside click
@@ -201,32 +202,32 @@ export const ColorPickerPopover = forwardRef<HTMLDivElement, ColorPickerPopoverP
 ColorPickerPopover.displayName = 'ColorPicker.Popover';
 
 /* ==============================================================================
-   4. 2D CANVAS SELECTION AREA (Retina High-DPI scaled)
+   4. 2D CANVAS AREA
    ============================================================================== */
 export interface ColorPickerCanvasProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export const ColorPickerCanvas = forwardRef<HTMLDivElement, ColorPickerCanvasProps>(
   ({ className = '', ...props }, ref) => {
     const { color, setOklch } = useColorPickerContext();
-    const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const containerRef = useRef<HTMLDivElement | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useImperativeHandle(ref, () => containerRef.current as HTMLDivElement);
 
-    // High-DPI Canvas Rendering
+    // High-DPI canvas rendering
     useEffect(() => {
       const canvas = canvasRef.current;
       if (!canvas) return;
+
+      const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
+      const w = 296;
+      const h = 160;
+
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
-
-      const dpr = window.devicePixelRatio || 1;
-      const rect = canvas.getBoundingClientRect();
-      const width = rect.width || 296;
-      const height = rect.height || 160;
-
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
 
       const imgData = ctx.createImageData(canvas.width, canvas.height);
       const data = imgData.data;
@@ -255,7 +256,7 @@ export const ColorPickerCanvas = forwardRef<HTMLDivElement, ColorPickerCanvasPro
       const container = containerRef.current;
       if (!container) return;
 
-      const controller = new PointerGestureController(container, (coords) => {
+      const controller = new PointerGestureController(container, (coords: { x: number; y: number }) => {
         setOklch({
           c: coords.x * 0.32,
           l: 1.0 - coords.y
@@ -284,8 +285,8 @@ export const ColorPickerCanvas = forwardRef<HTMLDivElement, ColorPickerCanvasPro
         aria-valuetext={`Lightness ${Math.round(color.l * 100)}%, Chroma ${color.c.toFixed(2)}`}
         onKeyDown={(e) => {
           handleSliderKeyNavigation(e.nativeEvent, {
-            onStepX: (delta) => setOklch({ c: Math.max(0, Math.min(0.32, color.c + delta * 0.32)) }),
-            onStepY: (delta) => setOklch({ l: Math.max(0, Math.min(1.0, color.l + delta)) }),
+            onStepX: (delta: number) => setOklch({ c: Math.max(0, Math.min(0.32, color.c + delta * 0.32)) }),
+            onStepY: (delta: number) => setOklch({ l: Math.max(0, Math.min(1.0, color.l + delta)) }),
             onMinX: () => setOklch({ c: 0 }),
             onMaxX: () => setOklch({ c: 0.32 })
           });
@@ -311,7 +312,7 @@ export const ColorPickerCanvas = forwardRef<HTMLDivElement, ColorPickerCanvasPro
 ColorPickerCanvas.displayName = 'ColorPicker.Canvas';
 
 /* ==============================================================================
-   5. SLIDERS (Hue & Alpha)
+   5. SLIDERS
    ============================================================================== */
 export function ColorPickerHueSlider() {
   const { color, setOklch } = useColorPickerContext();
@@ -322,16 +323,13 @@ export function ColorPickerHueSlider() {
       <div className="mdx-cp-track mdx-cp-track-hue">
         <input
           type="range"
-          min="0"
-          max="360"
-          step="0.5"
+          min={0}
+          max={360}
+          step={0.5}
           value={color.h}
-          className="mdx-cp-range-input"
-          aria-label="Hue"
-          aria-valuenow={Math.round(color.h)}
-          aria-valuemin={0}
-          aria-valuemax={360}
           onChange={(e) => setOklch({ h: parseFloat(e.target.value) })}
+          className="mdx-cp-range-input"
+          aria-label="Hue Slider"
         />
       </div>
     </div>
@@ -339,39 +337,39 @@ export function ColorPickerHueSlider() {
 }
 
 export function ColorPickerAlphaSlider() {
-  const { color, setOklch, hex } = useColorPickerContext();
+  const { color, setOklch } = useColorPickerContext();
+  const rgb = oklchToRgb(color);
+  const alphaGradient = `linear-gradient(to right, transparent, rgb(${rgb.r}, ${rgb.g}, ${rgb.b}))`;
 
   return (
     <div className="mdx-cp-slider-row">
       <span className="mdx-cp-slider-label">A</span>
       <div className="mdx-cp-track mdx-cp-track-checkered">
-        <div
-          className="mdx-cp-alpha-overlay"
-          style={{ background: `linear-gradient(to right, transparent, ${hex})` }}
-        />
+        <div className="mdx-cp-alpha-overlay" style={{ background: alphaGradient }} />
         <input
           type="range"
-          min="0"
-          max="100"
-          step="1"
-          value={Math.round(color.alpha * 100)}
-          className="mdx-cp-range-input"
-          aria-label="Alpha"
-          aria-valuenow={Math.round(color.alpha * 100)}
-          aria-valuemin={0}
-          aria-valuemax={100}
+          min={0}
+          max={100}
+          step={1}
+          value={Math.round((color.alpha ?? 1) * 100)}
           onChange={(e) => setOklch({ alpha: parseFloat(e.target.value) / 100 })}
+          className="mdx-cp-range-input"
+          aria-label="Alpha Slider"
         />
       </div>
     </div>
   );
 }
 
-export function ColorPickerSliders() {
+export interface ColorPickerSlidersProps {
+  showAlpha?: boolean;
+}
+
+export function ColorPickerSliders({ showAlpha = true }: ColorPickerSlidersProps = {}) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <ColorPickerHueSlider />
-      <ColorPickerAlphaSlider />
+      {showAlpha && <ColorPickerAlphaSlider />}
     </div>
   );
 }
@@ -446,8 +444,16 @@ export function ColorPickerA11yBar({ targetRatio = 4.5 }: { targetRatio?: number
   );
 }
 
-export function ColorPickerSwatches() {
+export interface ColorPickerSwatchesProps {
+  presets?: string[];
+}
+
+export function ColorPickerSwatches({ presets }: ColorPickerSwatchesProps = {}) {
   const { state, setColor } = useColorPickerContext();
+  const swatchList = presets || state.swatches || [
+    '#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4',
+    '#3b82f6', '#8b5cf6', '#ec4899', '#ffffff', '#18181b'
+  ];
 
   return (
     <div className="mdx-cp-swatches">
@@ -455,7 +461,7 @@ export function ColorPickerSwatches() {
         Saved:
       </span>
       <div className="mdx-cp-swatch-list">
-        {state.swatches.map((hex, i) => (
+        {swatchList.map((hex: string, i: number) => (
           <button
             key={i}
             type="button"
@@ -470,11 +476,16 @@ export function ColorPickerSwatches() {
   );
 }
 
-export function ColorPickerFooter() {
+export interface ColorPickerFooterProps {
+  presets?: string[];
+  targetRatio?: number;
+}
+
+export function ColorPickerFooter({ presets, targetRatio }: ColorPickerFooterProps = {}) {
   return (
     <div className="mdx-cp-footer">
-      <ColorPickerA11yBar />
-      <ColorPickerSwatches />
+      <ColorPickerA11yBar targetRatio={targetRatio} />
+      <ColorPickerSwatches presets={presets} />
     </div>
   );
 }
@@ -496,9 +507,8 @@ export const ColorPicker = {
   Footer: ColorPickerFooter
 };
 
-
 /* ==============================================================================
-   PRESET VARIANT COMPONENTS (Chrome, Sketch, Compact, Github, Swatches)
+   PRESET VARIANT COMPONENTS (Chrome, Sketch, Compact, Github)
    Inspired by ngx-color-picker
    ============================================================================== */
 
@@ -531,7 +541,7 @@ export const ChromePicker: React.FC<PredefinedPickerProps> = ({
         <ColorPickerCanvas />
         <ColorPickerSliders showAlpha={showAlpha} />
         <ColorPickerInputs />
-        <ColorPickerFooter />
+        <ColorPickerFooter presets={presets} />
       </ColorPickerPopover>
     </ColorPickerRoot>
   );
@@ -552,7 +562,7 @@ export const SketchPicker: React.FC<PredefinedPickerProps> = ({
         <ColorPickerCanvas />
         <ColorPickerSliders showAlpha={showAlpha} />
         <ColorPickerInputs />
-        <ColorPickerSwatches />
+        <ColorPickerSwatches presets={presets} />
       </ColorPickerPopover>
     </ColorPickerRoot>
   );

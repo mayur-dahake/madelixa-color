@@ -8,13 +8,17 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "style": "./dist/index.css",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./styles.css": "./dist/index.css"
+    "./styles.css": "./dist/index.css",
+    "./picker.css": "./dist/picker.css",
+    "./tokens.css": "./dist/tokens.css",
+    "./dist/*": "./dist/*"
   },
   "files": [
     "dist"

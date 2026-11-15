@@ -26,9 +26,12 @@ import {
   ColorStore,
   createColorStore,
   ColorSpace,
+  OklchColor,
   oklchToRgb,
   rgbToHex,
-  getRelativeLuminance
+  getRelativeLuminance,
+  generateTailwindScale,
+  generateHarmonies
 } from '@madelixa/color-core';
 import { PointerGestureController, setupPopoverPositioning } from '@madelixa/color-dom';
 import { ColorPickerControl } from './color-picker.control';
@@ -248,7 +251,7 @@ const SWATCH_COLUMNS = [
                 <input
                   type="number"
                   class="mdx-cp-field"
-                  [value]="store.getState().currentRgb.r"
+                  [value]="currentRgb().r"
                   (change)="onRgbInput('r', $event)"
                 />
                 <label>R</label>
@@ -257,7 +260,7 @@ const SWATCH_COLUMNS = [
                 <input
                   type="number"
                   class="mdx-cp-field"
-                  [value]="store.getState().currentRgb.g"
+                  [value]="currentRgb().g"
                   (change)="onRgbInput('g', $event)"
                 />
                 <label>G</label>
@@ -266,7 +269,7 @@ const SWATCH_COLUMNS = [
                 <input
                   type="number"
                   class="mdx-cp-field"
-                  [value]="store.getState().currentRgb.b"
+                  [value]="currentRgb().b"
                   (change)="onRgbInput('b', $event)"
                 />
                 <label>B</label>
@@ -540,8 +543,12 @@ export class MadelixaColorPickerComponent
     return ctrl ? ctrl.presets() : this.presets();
   });
 
+  readonly currentRgb = computed(() => {
+    return oklchToRgb(this.store.getState().currentOklch);
+  });
+
   readonly hexColor = computed(() => {
-    const rgb = this.store.getState().currentRgb;
+    const rgb = this.currentRgb();
     return rgbToHex(rgb.r, rgb.g, rgb.b);
   });
 
@@ -554,7 +561,7 @@ export class MadelixaColorPickerComponent
   });
 
   readonly alphaGradientCss = computed(() => {
-    const rgb = this.store.getState().currentRgb;
+    const rgb = this.currentRgb();
     return `linear-gradient(to right, rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0), rgb(${rgb.r}, ${rgb.g}, ${rgb.b}))`;
   });
 
@@ -569,7 +576,7 @@ export class MadelixaColorPickerComponent
   });
 
   readonly thumbBorderColor = computed(() => {
-    const rgb = this.store.getState().currentRgb;
+    const rgb = this.currentRgb();
     const lum = getRelativeLuminance(rgb.r, rgb.g, rgb.b);
     return lum > 0.5 ? '#18181b' : '#ffffff';
   });
@@ -583,28 +590,34 @@ export class MadelixaColorPickerComponent
   });
 
   readonly tailwindSteps = computed(() => {
-    const scale = this.store.getTailwindScale();
-    return Object.entries(scale).map(([step, color]) => ({
-      step,
-      hex: rgbToHex(color.r, color.g, color.b)
-    }));
+    const scale = generateTailwindScale(this.store.getState().currentOklch);
+    return Object.entries(scale).map(([step, oklch]) => {
+      const rgb = oklchToRgb(oklch);
+      return {
+        step,
+        hex: rgbToHex(rgb.r, rgb.g, rgb.b)
+      };
+    });
   });
 
   readonly harmoniesList = computed(() => {
-    const h = this.store.getHarmonies();
-    const mapRgb = (rgbs: any[]) => rgbs.map(r => rgbToHex(r.r, r.g, r.b));
+    const h = generateHarmonies(this.store.getState().currentOklch);
+    const mapOklch = (colors: OklchColor[]) => colors.map(c => {
+      const rgb = oklchToRgb(c);
+      return rgbToHex(rgb.r, rgb.g, rgb.b);
+    });
     return [
-      { name: 'Complementary', colors: mapRgb(h.complementary) },
-      { name: 'Triadic', colors: mapRgb(h.triadic) },
-      { name: 'Analogous', colors: mapRgb(h.analogous) },
-      { name: 'Tetradic', colors: mapRgb(h.tetradic) }
+      { name: 'Complementary', colors: mapOklch(h.complementary) },
+      { name: 'Triadic', colors: mapOklch(h.triadic) },
+      { name: 'Analogous', colors: mapOklch(h.analogous) },
+      { name: 'Tetradic', colors: mapOklch(h.tetradic) }
     ];
   });
 
   constructor() {
     this.store = createColorStore(this.value());
 
-    this.store.subscribe((state) => {
+    this.store.subscribe(() => {
       const formatted = this.store.getFormatted(this.format());
       this.value.set(formatted);
       this.color.set(formatted);
@@ -674,10 +687,10 @@ export class MadelixaColorPickerComponent
     }
 
     if (!this.inline() && this.triggerRef && this.popoverRef && !this.cleanupPopover) {
-      this.cleanupPopover = setupPopoverPositioning(
-        this.triggerRef.nativeElement,
-        this.popoverRef.nativeElement
-      );
+      this.cleanupPopover = setupPopoverPositioning({
+        referenceElement: this.triggerRef.nativeElement,
+        floatingElement: this.popoverRef.nativeElement
+      });
     }
   }
 
@@ -733,7 +746,7 @@ export class MadelixaColorPickerComponent
 
   onAlphaInput(e: Event): void {
     const val = parseFloat((e.target as HTMLInputElement).value) / 100;
-    this.store.dispatch({ type: 'SET_ALPHA', payload: val });
+    this.store.dispatch({ type: 'SET_OKLCH', payload: { alpha: val } });
   }
 
   onFormatChange(e: Event): void {
@@ -749,7 +762,8 @@ export class MadelixaColorPickerComponent
   }
 
   onRgbInput(channel: 'r' | 'g' | 'b', e: Event): void {
-    const current = { ...this.store.getState().currentRgb };
+    const rgb = oklchToRgb(this.store.getState().currentOklch);
+    const current = { ...rgb };
     const val = parseInt((e.target as HTMLInputElement).value, 10) || 0;
     current[channel] = Math.min(Math.max(val, 0), 255);
     this.setColor(rgbToHex(current.r, current.g, current.b));
@@ -779,7 +793,7 @@ export class MadelixaColorPickerComponent
   }
 
   // Validator
-  validate(control: AbstractControl): ValidationErrors | null {
+  validate(_control: AbstractControl): ValidationErrors | null {
     const minRatio = this.minContrastRatio();
     if (minRatio !== null) {
       const actualRatio = this.contrastRatio();

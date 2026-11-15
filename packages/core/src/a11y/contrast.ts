@@ -67,6 +67,7 @@ export function getContrastReport(fg: OklchColor, bg: OklchColor): ContrastRepor
   return {
     wcagRatio: ratio,
     aaNormal: ratio >= 4.5,
+    passesAA: ratio >= 4.5,
     aaLarge: ratio >= 3.0,
     aaaNormal: ratio >= 7.0,
     apcaLc: apca

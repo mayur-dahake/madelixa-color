@@ -82,6 +82,8 @@ export interface ContrastReport {
   wcagRatio: number;
   /** Ratio >= 4.5:1 */
   aaNormal: boolean;
+  /** Alias for aaNormal */
+  passesAA: boolean;
   /** Ratio >= 3.0:1 */
   aaLarge: boolean;
   /** Ratio >= 7.0:1 */

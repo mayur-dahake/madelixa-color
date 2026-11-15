@@ -39,7 +39,7 @@ export function useColorPicker(options: UseColorPickerOptions = {}) {
   }, [format, store]);
 
   // Connect store with useSyncExternalStore for React 18/19 concurrent safety
-  const state = useSyncExternalStore(
+  const state: ColorPickerState = useSyncExternalStore(
     store.subscribe,
     store.getState,
     store.getState
@@ -94,7 +94,7 @@ export function useColorPicker(options: UseColorPickerOptions = {}) {
     oklch: store.getFormatted('oklch'),
     p3: store.getFormatted('p3'),
     contrastRatio: state.contrast.wcagRatio,
-    isAccessible: state.contrast.aaNormal,
+    isAccessible: state.contrast.passesAA,
     setColor,
     setOklch,
     setFormat,
