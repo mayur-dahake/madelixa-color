@@ -18,6 +18,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@madelixa/color-core": "workspace:*",
     "@madelixa/color-dom": "workspace:*",
