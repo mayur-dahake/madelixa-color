@@ -1,246 +1,444 @@
-import React, { createContext, useContext, useRef, useEffect, useState } from 'react';
-import { useColorPicker, UseColorPickerOptions } from '../hooks/useColorPicker';
-import { PointerGestureController, setupPopoverPositioning } from '@madelixa/color-dom';
-import { oklchToRgb, rgbToHex, getRelativeLuminance } from '@madelixa/color-core';
+import React, {
+  createContext,
+  useContext,
+  useRef,
+  useEffect,
+  useState,
+  forwardRef,
+  useImperativeHandle
+} from 'react';
+import { useColorPicker, UseColorPickerOptions } from '../hooks/useColorPicker.ts';
+import {
+  PointerGestureController,
+  setupPopoverPositioning,
+  handleSliderKeyNavigation
+} from '@madelixa/color-dom';
+import {
+  oklchToRgb,
+  rgbToHex,
+  getRelativeLuminance,
+  formatColor,
+  ColorSpace
+} from '@madelixa/color-core';
 
-type ColorPickerContextValue = ReturnType<typeof useColorPicker> & {
+export interface ColorPickerContextValue extends ReturnType<typeof useColorPicker> {
   isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
-  triggerRef: React.RefObject<HTMLDivElement | null>;
+  setIsOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
+  triggerRef: React.RefObject<HTMLButtonElement | null>;
   popoverRef: React.RefObject<HTMLDivElement | null>;
-};
+  activeTab: 'solid' | 'gradient' | 'harmonies' | 'scales';
+  setActiveTab: (tab: 'solid' | 'gradient' | 'harmonies' | 'scales') => void;
+}
 
 const ColorPickerContext = createContext<ColorPickerContextValue | null>(null);
 
-export function useColorPickerContext() {
+export function useColorPickerContext(): ColorPickerContextValue {
   const ctx = useContext(ColorPickerContext);
   if (!ctx) {
-    throw new Error('ColorPicker compound components must be used within <ColorPicker.Root>');
+    throw new Error('ColorPicker compound sub-components must be wrapped within <ColorPicker.Root>');
   }
   return ctx;
 }
 
+/* ==============================================================================
+   1. ROOT
+   ============================================================================== */
 export interface ColorPickerRootProps extends UseColorPickerOptions {
   children: React.ReactNode;
   className?: string;
+  defaultOpen?: boolean;
 }
 
-export function ColorPickerRoot({ children, className, ...options }: ColorPickerRootProps) {
-  const picker = useColorPicker(options);
-  const [isOpen, setIsOpen] = useState(false);
-  const triggerRef = useRef<HTMLDivElement | null>(null);
-  const popoverRef = useRef<HTMLDivElement | null>(null);
+export const ColorPickerRoot = forwardRef<HTMLDivElement, ColorPickerRootProps>(
+  ({ children, className = '', defaultOpen = false, ...options }, ref) => {
+    const picker = useColorPicker(options);
+    const [isOpen, setIsOpen] = useState(defaultOpen);
+    const [activeTab, setActiveTab] = useState<'solid' | 'gradient' | 'harmonies' | 'scales'>('solid');
 
-  useEffect(() => {
-    if (isOpen && triggerRef.current && popoverRef.current) {
-      const cleanup = setupPopoverPositioning({
-        referenceElement: triggerRef.current,
-        floatingElement: popoverRef.current
-      });
-      return cleanup;
-    }
-  }, [isOpen]);
+    const triggerRef = useRef<HTMLButtonElement | null>(null);
+    const popoverRef = useRef<HTMLDivElement | null>(null);
 
-  const value = {
-    ...picker,
-    isOpen,
-    setIsOpen,
-    triggerRef,
-    popoverRef
-  };
+    // Floating UI auto-positioning
+    useEffect(() => {
+      if (isOpen && triggerRef.current && popoverRef.current) {
+        return setupPopoverPositioning({
+          referenceElement: triggerRef.current,
+          floatingElement: popoverRef.current,
+          placement: 'bottom-start'
+        });
+      }
+    }, [isOpen]);
 
-  return (
-    <ColorPickerContext.Provider value={value}>
-      <div className={`mdx-color-picker-root ${className || ''}`} style={{ position: 'relative' }}>
+    // Close on outside click
+    useEffect(() => {
+      if (!isOpen) return;
+
+      const handlePointerDownOutside = (e: PointerEvent) => {
+        const target = e.target as Node;
+        if (
+          popoverRef.current &&
+          !popoverRef.current.contains(target) &&
+          triggerRef.current &&
+          !triggerRef.current.contains(target)
+        ) {
+          setIsOpen(false);
+        }
+      };
+
+      window.addEventListener('pointerdown', handlePointerDownOutside);
+      return () => window.removeEventListener('pointerdown', handlePointerDownOutside);
+    }, [isOpen]);
+
+    const contextValue: ColorPickerContextValue = {
+      ...picker,
+      isOpen,
+      setIsOpen,
+      triggerRef,
+      popoverRef,
+      activeTab,
+      setActiveTab
+    };
+
+    return (
+      <ColorPickerContext.Provider value={contextValue}>
+        <div ref={ref} className={`mdx-color-picker ${className}`}>
+          {children}
+        </div>
+      </ColorPickerContext.Provider>
+    );
+  }
+);
+ColorPickerRoot.displayName = 'ColorPicker.Root';
+
+/* ==============================================================================
+   2. TRIGGER
+   ============================================================================== */
+export interface ColorPickerTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  showValue?: boolean;
+  showEyeDropper?: boolean;
+}
+
+export const ColorPickerTrigger = forwardRef<HTMLButtonElement, ColorPickerTriggerProps>(
+  ({ className = '', showValue = true, showEyeDropper = true, ...props }, ref) => {
+    const { triggerRef, hex, setIsOpen, isOpen, openEyeDropper, state } = useColorPickerContext();
+
+    useImperativeHandle(ref, () => triggerRef.current as HTMLButtonElement);
+
+    return (
+      <button
+        ref={triggerRef}
+        type="button"
+        className={`mdx-cp-trigger ${className}`}
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen((prev) => !prev)}
+        {...props}
+      >
+        <span className="mdx-cp-trigger-swatch mdx-cp-track-checkered">
+          <span
+            style={{
+              display: 'block',
+              width: '100%',
+              height: '100%',
+              backgroundColor: hex,
+              opacity: state.currentOklch.alpha
+            }}
+          />
+        </span>
+        {showValue && <span className="mdx-cp-trigger-text">{hex}</span>}
+        {showEyeDropper && (
+          <span
+            className="mdx-cp-btn"
+            style={{ width: 22, height: 22, padding: 0 }}
+            title="Sample color from screen"
+            onClick={(e) => {
+              e.stopPropagation();
+              openEyeDropper();
+            }}
+          >
+            💉
+          </span>
+        )}
+      </button>
+    );
+  }
+);
+ColorPickerTrigger.displayName = 'ColorPicker.Trigger';
+
+/* ==============================================================================
+   3. POPOVER
+   ============================================================================== */
+export interface ColorPickerPopoverProps extends React.HTMLAttributes<HTMLDivElement> {}
+
+export const ColorPickerPopover = forwardRef<HTMLDivElement, ColorPickerPopoverProps>(
+  ({ children, className = '', ...props }, ref) => {
+    const { isOpen, popoverRef, setIsOpen } = useColorPickerContext();
+
+    useImperativeHandle(ref, () => popoverRef.current as HTMLDivElement);
+
+    if (!isOpen) return null;
+
+    return (
+      <div
+        ref={popoverRef}
+        className={`mdx-cp-popover ${className}`}
+        role="dialog"
+        aria-label="Color Picker"
+        tabIndex={-1}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            e.stopPropagation();
+            setIsOpen(false);
+          }
+        }}
+        {...props}
+      >
         {children}
       </div>
-    </ColorPickerContext.Provider>
-  );
-}
+    );
+  }
+);
+ColorPickerPopover.displayName = 'ColorPicker.Popover';
 
-export function ColorPickerTrigger({ className }: { className?: string }) {
-  const { triggerRef, hex, setIsOpen, isOpen, openEyeDropper, state } = useColorPickerContext();
+/* ==============================================================================
+   4. 2D CANVAS SELECTION AREA (Retina High-DPI scaled)
+   ============================================================================== */
+export interface ColorPickerCanvasProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-  return (
-    <div
-      ref={triggerRef}
-      className={`mdx-cp-trigger flex items-center gap-2 p-1.5 rounded-xl border border-slate-300 bg-white shadow-sm cursor-pointer ${className || ''}`}
-      onClick={() => setIsOpen(!isOpen)}
-    >
-      <div className="w-6 h-6 rounded-lg mdx-cp-checkered-bg relative overflow-hidden flex-shrink-0 border border-black/10">
-        <div className="w-full h-full" style={{ backgroundColor: hex, opacity: state.currentOklch.alpha }} />
-      </div>
-      <span className="text-xs font-mono font-medium text-slate-800 flex-1">{hex}</span>
-      <button
-        type="button"
-        className="p-1 rounded hover:bg-slate-100 text-xs text-slate-600 transition"
-        onClick={(e) => {
-          e.stopPropagation();
-          openEyeDropper();
-        }}
-      >
-        💉
-      </button>
-    </div>
-  );
-}
+export const ColorPickerCanvas = forwardRef<HTMLDivElement, ColorPickerCanvasProps>(
+  ({ className = '', ...props }, ref) => {
+    const { color, setOklch } = useColorPickerContext();
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const containerRef = useRef<HTMLDivElement | null>(null);
 
-export function ColorPickerPopover({ children, className }: { children: React.ReactNode; className?: string }) {
-  const { isOpen, popoverRef } = useColorPickerContext();
+    useImperativeHandle(ref, () => containerRef.current as HTMLDivElement);
 
-  if (!isOpen) return null;
+    // High-DPI Canvas Rendering
+    useEffect(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
 
-  return (
-    <div
-      ref={popoverRef}
-      className={`mdx-cp-popover absolute z-50 w-[320px] rounded-xl p-3 border border-slate-200 bg-white shadow-xl space-y-2.5 ${className || ''}`}
-      role="dialog"
-      aria-label="Color Picker"
-    >
-      {children}
-    </div>
-  );
-}
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      const width = rect.width || 296;
+      const height = rect.height || 160;
 
-export function ColorPickerCanvas({ className }: { className?: string }) {
-  const { color, setOklch } = useColorPickerContext();
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
 
-  // Render OKLCH Lightness vs Chroma canvas
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+      const imgData = ctx.createImageData(canvas.width, canvas.height);
+      const data = imgData.data;
+      const totalW = canvas.width;
+      const totalH = canvas.height;
+      const hue = color.h;
 
-    const w = canvas.width;
-    const h = canvas.height;
-    const imgData = ctx.createImageData(w, h);
-    const data = imgData.data;
-
-    let idx = 0;
-    for (let y = 0; y < h; y++) {
-      const l = 1.0 - y / h;
-      for (let x = 0; x < w; x++) {
-        const c = (x / w) * 0.32;
-        const rgb = oklchToRgb({ l, c, h: color.h, alpha: 1 });
-        data[idx] = rgb.r;
-        data[idx + 1] = rgb.g;
-        data[idx + 2] = rgb.b;
-        data[idx + 3] = 255;
-        idx += 4;
+      let idx = 0;
+      for (let y = 0; y < totalH; y++) {
+        const l = 1.0 - y / totalH;
+        for (let x = 0; x < totalW; x++) {
+          const c = (x / totalW) * 0.32;
+          const rgb = oklchToRgb({ l, c, h: hue, alpha: 1 });
+          data[idx] = rgb.r;
+          data[idx + 1] = rgb.g;
+          data[idx + 2] = rgb.b;
+          data[idx + 3] = 255;
+          idx += 4;
+        }
       }
-    }
-    ctx.putImageData(imgData, 0, 0);
-  }, [color.h]);
+      ctx.putImageData(imgData, 0, 0);
+    }, [color.h]);
 
-  // Attach 60fps PointerGestureController
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    // 60fps Pointer Gesture Controller
+    useEffect(() => {
+      const container = containerRef.current;
+      if (!container) return;
 
-    const controller = new PointerGestureController(container, (coords) => {
-      setOklch({
-        c: coords.x * 0.32,
-        l: 1.0 - coords.y
+      const controller = new PointerGestureController(container, (coords) => {
+        setOklch({
+          c: coords.x * 0.32,
+          l: 1.0 - coords.y
+        });
       });
-    });
 
-    return () => controller.destroy();
-  }, [setOklch]);
+      return () => controller.destroy();
+    }, [setOklch]);
 
-  const rgb = oklchToRgb(color);
-  const lum = getRelativeLuminance(rgb.r, rgb.g, rgb.b);
-  const thumbBorder = lum > 0.5 ? '#000000' : '#ffffff';
+    const rgb = oklchToRgb(color);
+    const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+    const lum = getRelativeLuminance(rgb.r, rgb.g, rgb.b);
+    const thumbBorder = lum > 0.5 ? '#000000' : '#ffffff';
 
-  const thumbX = Math.min(Math.max((color.c / 0.32) * 100, 0), 100);
-  const thumbY = Math.min(Math.max((1.0 - color.l) * 100, 0), 100);
+    const thumbX = Math.min(Math.max((color.c / 0.32) * 100, 0), 100);
+    const thumbY = Math.min(Math.max((1.0 - color.l) * 100, 0), 100);
+
+    return (
+      <div
+        ref={containerRef}
+        className={`mdx-cp-canvas-area ${className}`}
+        tabIndex={0}
+        role="slider"
+        aria-label="Color Canvas Area"
+        aria-roledescription="2D Lightness and Chroma area"
+        aria-valuetext={`Lightness ${Math.round(color.l * 100)}%, Chroma ${color.c.toFixed(2)}`}
+        onKeyDown={(e) => {
+          handleSliderKeyNavigation(e.nativeEvent, {
+            onStepX: (delta) => setOklch({ c: Math.max(0, Math.min(0.32, color.c + delta * 0.32)) }),
+            onStepY: (delta) => setOklch({ l: Math.max(0, Math.min(1.0, color.l + delta)) }),
+            onMinX: () => setOklch({ c: 0 }),
+            onMaxX: () => setOklch({ c: 0.32 })
+          });
+        }}
+        {...props}
+      >
+        <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />
+        <div
+          className="mdx-cp-thumb"
+          style={{
+            left: `${thumbX}%`,
+            top: `${thumbY}%`,
+            backgroundColor: hex,
+            borderColor: thumbBorder,
+            borderWidth: 2,
+            borderStyle: 'solid'
+          }}
+        />
+      </div>
+    );
+  }
+);
+ColorPickerCanvas.displayName = 'ColorPicker.Canvas';
+
+/* ==============================================================================
+   5. SLIDERS (Hue & Alpha)
+   ============================================================================== */
+export function ColorPickerHueSlider() {
+  const { color, setOklch } = useColorPickerContext();
 
   return (
-    <div
-      ref={containerRef}
-      className={`relative w-full h-[150px] rounded-lg overflow-hidden cursor-crosshair select-none border border-black/10 ${className || ''}`}
-    >
-      <canvas ref={canvasRef} width={296} height={150} className="w-full h-full block" />
-      <div
-        className="absolute w-4 h-4 rounded-full -ml-2 -mt-2 pointer-events-none shadow-md"
-        style={{
-          left: `${thumbX}%`,
-          top: `${thumbY}%`,
-          backgroundColor: rgbToHex(rgb.r, rgb.g, rgb.b),
-          borderColor: thumbBorder,
-          borderWidth: 2,
-          borderStyle: 'solid'
-        }}
-        role="slider"
-        aria-roledescription="2D color area"
-      />
+    <div className="mdx-cp-slider-row">
+      <span className="mdx-cp-slider-label">H</span>
+      <div className="mdx-cp-track mdx-cp-track-hue">
+        <input
+          type="range"
+          min="0"
+          max="360"
+          step="0.5"
+          value={color.h}
+          className="mdx-cp-range-input"
+          aria-label="Hue"
+          aria-valuenow={Math.round(color.h)}
+          aria-valuemin={0}
+          aria-valuemax={360}
+          onChange={(e) => setOklch({ h: parseFloat(e.target.value) })}
+        />
+      </div>
+    </div>
+  );
+}
+
+export function ColorPickerAlphaSlider() {
+  const { color, setOklch, hex } = useColorPickerContext();
+
+  return (
+    <div className="mdx-cp-slider-row">
+      <span className="mdx-cp-slider-label">A</span>
+      <div className="mdx-cp-track mdx-cp-track-checkered">
+        <div
+          className="mdx-cp-alpha-overlay"
+          style={{ background: `linear-gradient(to right, transparent, ${hex})` }}
+        />
+        <input
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          value={Math.round(color.alpha * 100)}
+          className="mdx-cp-range-input"
+          aria-label="Alpha"
+          aria-valuenow={Math.round(color.alpha * 100)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          onChange={(e) => setOklch({ alpha: parseFloat(e.target.value) / 100 })}
+        />
+      </div>
     </div>
   );
 }
 
 export function ColorPickerSliders() {
-  const { color, setOklch, hex } = useColorPickerContext();
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <ColorPickerHueSlider />
+      <ColorPickerAlphaSlider />
+    </div>
+  );
+}
+
+/* ==============================================================================
+   6. MULTI-FORMAT INPUTS ROW
+   ============================================================================== */
+export function ColorPickerInputs() {
+  const { state, setFormat, setColor } = useColorPickerContext();
+  const [localVal, setLocalVal] = useState('');
+
+  useEffect(() => {
+    setLocalVal(formatColor(state.currentOklch, state.activeFormat));
+  }, [state.currentOklch, state.activeFormat]);
 
   return (
-    <div className="space-y-2">
-      {/* Hue */}
-      <div className="flex items-center gap-2">
-        <span className="text-[10px] font-bold text-slate-400 w-3">H</span>
-        <div className="relative flex-1 h-3 rounded-full mdx-cp-hue-track overflow-hidden">
-          <input
-            type="range"
-            min="0"
-            max="360"
-            value={color.h}
-            onChange={(e) => setOklch({ h: parseFloat(e.target.value) })}
-            className="w-full h-full absolute top-0 left-0 cursor-pointer"
-          />
-        </div>
-      </div>
-      {/* Alpha */}
-      <div className="flex items-center gap-2">
-        <span className="text-[10px] font-bold text-slate-400 w-3">A</span>
-        <div className="relative flex-1 h-3 rounded-full mdx-cp-checkered-bg overflow-hidden border border-black/5">
-          <div
-            className="w-full h-full absolute top-0 left-0 pointer-events-none"
-            style={{ background: `linear-gradient(to right, transparent, ${hex})` }}
-          />
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={Math.round(color.alpha * 100)}
-            onChange={(e) => setOklch({ alpha: parseFloat(e.target.value) / 100 })}
-            className="w-full h-full absolute top-0 left-0 cursor-pointer"
-          />
-        </div>
+    <div className="mdx-cp-inputs-row">
+      <select
+        value={state.activeFormat}
+        onChange={(e) => setFormat(e.target.value as ColorSpace)}
+        className="mdx-cp-select"
+        aria-label="Color Space Format"
+      >
+        <option value="hex">HEX</option>
+        <option value="rgb">RGB</option>
+        <option value="hsl">HSL</option>
+        <option value="oklch">OKLCH</option>
+        <option value="p3">P3</option>
+      </select>
+      <div className="mdx-cp-input-group">
+        <input
+          type="text"
+          value={localVal}
+          onChange={(e) => setLocalVal(e.target.value)}
+          onBlur={() => setColor(localVal)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              setColor(localVal);
+            }
+          }}
+          className="mdx-cp-field"
+          aria-label="Color Value"
+        />
       </div>
     </div>
   );
 }
 
-export function ColorPickerA11yBar() {
+/* ==============================================================================
+   7. ACCESSIBILITY & SWATCHES FOOTER
+   ============================================================================== */
+export function ColorPickerA11yBar({ targetRatio = 4.5 }: { targetRatio?: number }) {
   const { contrastRatio, isAccessible, autoFix } = useColorPickerContext();
 
   return (
-    <div className="flex items-center justify-between text-[11px] pt-1">
-      <div className="flex items-center gap-1.5">
-        <span className="text-slate-500">vs #FFF:</span>
-        <span className="font-mono font-bold text-slate-800">{contrastRatio}:1</span>
-        <span
-          className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
-            isAccessible ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
-          }`}
-        >
+    <div className="mdx-cp-a11y-bar">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ color: 'var(--mdx-cp-text-secondary)' }}>vs #FFF:</span>
+        <span style={{ fontFamily: 'var(--mdx-cp-font-mono)', fontWeight: 700 }}>{contrastRatio}:1</span>
+        <span className={`mdx-cp-pill ${isAccessible ? 'mdx-cp-pill-pass' : 'mdx-cp-pill-fail'}`}>
           {isAccessible ? 'AA ✓' : 'AA ✕'}
         </span>
       </div>
       <button
         type="button"
-        onClick={() => autoFix(4.5)}
-        className="text-[10px] px-2 py-0.5 rounded bg-blue-600 text-white font-medium hover:bg-blue-700 transition shadow-sm"
+        className="mdx-cp-btn mdx-cp-btn-primary"
+        onClick={() => autoFix(targetRatio)}
       >
         ⚡ Auto-Fix
       </button>
@@ -248,11 +446,52 @@ export function ColorPickerA11yBar() {
   );
 }
 
+export function ColorPickerSwatches() {
+  const { state, setColor } = useColorPickerContext();
+
+  return (
+    <div className="mdx-cp-swatches">
+      <span style={{ fontSize: 'var(--mdx-cp-font-size-xs)', color: 'var(--mdx-cp-text-muted)' }}>
+        Saved:
+      </span>
+      <div className="mdx-cp-swatch-list">
+        {state.swatches.map((hex, i) => (
+          <button
+            key={i}
+            type="button"
+            className="mdx-cp-swatch-btn"
+            style={{ backgroundColor: hex }}
+            title={`Select ${hex}`}
+            onClick={() => setColor(hex)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function ColorPickerFooter() {
+  return (
+    <div className="mdx-cp-footer">
+      <ColorPickerA11yBar />
+      <ColorPickerSwatches />
+    </div>
+  );
+}
+
+/* ==============================================================================
+   EXPORT COMPOUND COMPONENT
+   ============================================================================== */
 export const ColorPicker = {
   Root: ColorPickerRoot,
   Trigger: ColorPickerTrigger,
   Popover: ColorPickerPopover,
   Canvas: ColorPickerCanvas,
+  HueSlider: ColorPickerHueSlider,
+  AlphaSlider: ColorPickerAlphaSlider,
   Sliders: ColorPickerSliders,
-  A11yBar: ColorPickerA11yBar
+  Inputs: ColorPickerInputs,
+  A11yBar: ColorPickerA11yBar,
+  Swatches: ColorPickerSwatches,
+  Footer: ColorPickerFooter
 };

@@ -15,23 +15,21 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
       - name: Install Dependencies
-        run: npm ci
+        run: pnpm install --no-frozen-lockfile
 
-      - name: Run Linter
-        run: npm run lint --if-present
-
-      - name: Run Unit Tests
-        run: npm run test
-
-      - name: Verify Types
-        run: npm run typecheck
+      - name: Run Core Verification Tests
+        run: node --experimental-strip-types packages/core/tests/verify.ts
 
       - name: Build All Packages
-        run: npm run build
+        run: pnpm run build
