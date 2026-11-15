@@ -1,6 +1,6 @@
 {
   "name": "@madelixa/color-react",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "React 18+ hooks and compound color picker components for Madelixa Color Picker",
   "author": "Mayur Dahake <mayur@madelixa.com>",

@@ -1,6 +1,6 @@
 {
   "name": "@madelixa/color-angular",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Standalone Angular component with Signals, ControlValueAccessor, and 60fps drag optimization for Madelixa Color Picker",
   "author": "Mayur Dahake <mayur@madelixa.com>",

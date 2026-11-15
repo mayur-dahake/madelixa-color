@@ -1,6 +1,6 @@
 {
   "name": "madelixa-color-monorepo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Universal, accessible, wide-gamut OKLCH & Display P3 color picker suite for Angular, React, and Web Components by MADELIXA",
   "author": "Mayur Dahake <mayur@madelixa.com>",

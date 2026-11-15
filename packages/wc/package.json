@@ -1,6 +1,6 @@
 {
   "name": "@madelixa/color-wc",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Form-Associated Web Component for Madelixa Color Picker with Lit and Shadow DOM",
   "author": "Mayur Dahake <mayur@madelixa.com>",
