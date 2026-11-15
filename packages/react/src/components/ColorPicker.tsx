@@ -495,3 +495,123 @@ export const ColorPicker = {
   Swatches: ColorPickerSwatches,
   Footer: ColorPickerFooter
 };
+
+
+/* ==============================================================================
+   PRESET VARIANT COMPONENTS (Chrome, Sketch, Compact, Github, Swatches)
+   Inspired by ngx-color-picker
+   ============================================================================== */
+
+export interface PredefinedPickerProps {
+  value?: string;
+  onChange?: (color: string) => void;
+  inline?: boolean;
+  showAlpha?: boolean;
+  presets?: string[];
+  className?: string;
+}
+
+const DEFAULT_PRESETS = [
+  '#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4',
+  '#3b82f6', '#8b5cf6', '#ec4899', '#ffffff', '#18181b'
+];
+
+export const ChromePicker: React.FC<PredefinedPickerProps> = ({
+  value = '#3b82f6',
+  onChange,
+  inline = true,
+  showAlpha = true,
+  presets = DEFAULT_PRESETS,
+  className = ''
+}) => {
+  return (
+    <ColorPickerRoot value={value} onChange={onChange} defaultOpen={inline} className={className}>
+      {!inline && <ColorPickerTrigger />}
+      <ColorPickerPopover className={`mdx-cp-popover--chrome ${inline ? 'mdx-cp-popover--inline' : ''}`}>
+        <ColorPickerCanvas />
+        <ColorPickerSliders showAlpha={showAlpha} />
+        <ColorPickerInputs />
+        <ColorPickerFooter />
+      </ColorPickerPopover>
+    </ColorPickerRoot>
+  );
+};
+
+export const SketchPicker: React.FC<PredefinedPickerProps> = ({
+  value = '#3b82f6',
+  onChange,
+  inline = true,
+  showAlpha = true,
+  presets = DEFAULT_PRESETS,
+  className = ''
+}) => {
+  return (
+    <ColorPickerRoot value={value} onChange={onChange} defaultOpen={inline} className={className}>
+      {!inline && <ColorPickerTrigger />}
+      <ColorPickerPopover className={`mdx-cp-popover--sketch ${inline ? 'mdx-cp-popover--inline' : ''}`}>
+        <ColorPickerCanvas />
+        <ColorPickerSliders showAlpha={showAlpha} />
+        <ColorPickerInputs />
+        <ColorPickerSwatches />
+      </ColorPickerPopover>
+    </ColorPickerRoot>
+  );
+};
+
+export const CompactPicker: React.FC<PredefinedPickerProps> = ({
+  value = '#3b82f6',
+  onChange,
+  inline = true,
+  presets = DEFAULT_PRESETS,
+  className = ''
+}) => {
+  return (
+    <ColorPickerRoot value={value} onChange={onChange} defaultOpen={inline} className={className}>
+      {!inline && <ColorPickerTrigger />}
+      <ColorPickerPopover className={`mdx-cp-popover--compact ${inline ? 'mdx-cp-popover--inline' : ''}`}>
+        <div className="mdx-cp-compact-grid">
+          {presets.map((color) => (
+            <button
+              key={color}
+              type="button"
+              className="mdx-cp-compact-swatch"
+              style={{ backgroundColor: color }}
+              onClick={() => onChange?.(color)}
+            />
+          ))}
+        </div>
+        <div style={{ marginTop: '8px' }}>
+          <ColorPickerHueSlider />
+        </div>
+      </ColorPickerPopover>
+    </ColorPickerRoot>
+  );
+};
+
+export const GithubPicker: React.FC<PredefinedPickerProps> = ({
+  value = '#3b82f6',
+  onChange,
+  inline = true,
+  presets = DEFAULT_PRESETS,
+  className = ''
+}) => {
+  return (
+    <ColorPickerRoot value={value} onChange={onChange} defaultOpen={inline} className={className}>
+      {!inline && <ColorPickerTrigger />}
+      <ColorPickerPopover className={`mdx-cp-popover--github ${inline ? 'mdx-cp-popover--inline' : ''}`}>
+        {!inline && <div className="mdx-cp-github-arrow" />}
+        <div className="mdx-cp-github-grid">
+          {presets.map((color) => (
+            <button
+              key={color}
+              type="button"
+              className="mdx-cp-github-swatch"
+              style={{ backgroundColor: color }}
+              onClick={() => onChange?.(color)}
+            />
+          ))}
+        </div>
+      </ColorPickerPopover>
+    </ColorPickerRoot>
+  );
+};

@@ -381,3 +381,149 @@
 .mdx-cp-swatch-btn:hover {
   transform: scale(1.15);
 }
+
+
+/* ==============================================================================
+   PRESET VARIANTS (Inspired by ngx-color-picker: Chrome, Sketch, Compact, Github, Swatches)
+   ============================================================================== */
+
+/* Inline Mode (No popover shadow, embedded directly in layout) */
+.mdx-color-picker--inline,
+.mdx-cp-popover--inline {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  display: flex !important;
+}
+
+/* 1. Chrome Variant (Modern Studio) */
+.mdx-cp-popover--chrome {
+  width: 320px;
+}
+.mdx-cp-chrome-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mdx-cp-color-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 2. Sketch Variant */
+.mdx-cp-popover--sketch {
+  width: 280px;
+}
+.mdx-cp-sketch-fields {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.mdx-cp-sketch-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.mdx-cp-sketch-col label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--mdx-cp-text-muted);
+  text-transform: uppercase;
+}
+
+/* 3. Compact Variant */
+.mdx-cp-popover--compact {
+  width: 250px;
+  padding: 10px;
+}
+.mdx-cp-compact-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+}
+.mdx-cp-compact-swatch {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+.mdx-cp-compact-swatch:hover {
+  transform: scale(1.12);
+  z-index: 1;
+}
+
+/* 4. GitHub Variant */
+.mdx-cp-popover--github {
+  width: auto;
+  min-width: 220px;
+  padding: 10px;
+  position: relative;
+}
+.mdx-cp-github-arrow {
+  position: absolute;
+  top: -6px;
+  left: 16px;
+  width: 12px;
+  height: 12px;
+  background-color: var(--mdx-cp-bg-surface);
+  border-left: 1px solid var(--mdx-cp-border);
+  border-top: 1px solid var(--mdx-cp-border);
+  transform: rotate(45deg);
+}
+.mdx-cp-github-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 240px;
+}
+.mdx-cp-github-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.mdx-cp-github-swatch:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* 5. Swatches Variant */
+.mdx-cp-popover--swatches {
+  width: 320px;
+  max-height: 380px;
+  overflow-y: auto;
+}
+.mdx-cp-swatches-columns {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+.mdx-cp-swatches-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+.mdx-cp-swatch-item {
+  height: 18px;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.08s ease;
+}
+.mdx-cp-swatch-item:hover {
+  transform: scale(1.08);
+  z-index: 1;
+}

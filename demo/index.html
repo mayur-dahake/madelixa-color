@@ -1,31 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Madelixa Color Picker — Precision Design System Demo</title>
+  <title>Madelixa Color Picker — Precision Design System Showcase</title>
   <link rel="stylesheet" href="../packages/dom/src/styles/picker.css">
   <style>
     /* Demo Workspace Environment */
+    :root {
+      --demo-bg: #0c0a09;
+      --demo-surface: #18181b;
+      --demo-border: #27272a;
+      --demo-text: #f4f4f5;
+      --demo-muted: #a1a1aa;
+    }
+
+    body.light-mode {
+      --demo-bg: #f4f4f5;
+      --demo-surface: #ffffff;
+      --demo-border: #e4e4e7;
+      --demo-text: #09090b;
+      --demo-muted: #71717a;
+    }
+
     body {
       margin: 0;
       padding: 0;
       background-color: #0c0a09;
       color: #f4f4f5;
+      background-color: var(--demo-bg);
+      color: var(--demo-text);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      transition: background-color 0.2s ease, color 0.2s ease;
     }
 
     header {
       height: 52px;
       border-bottom: 1px solid #27272a;
+      height: 54px;
+      border-bottom: 1px solid var(--demo-border);
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 24px;
       background-color: #18181b;
+      background-color: var(--demo-surface);
     }
 
     .brand {
@@ -36,9 +60,12 @@
       font-size: 14px;
       letter-spacing: -0.01em;
     }
+
     .brand-mark {
       width: 22px;
       height: 22px;
+      width: 24px;
+      height: 24px;
       border-radius: 6px;
       background: #2563eb;
       display: flex;
@@ -46,14 +73,94 @@
       justify-content: center;
       color: white;
       font-weight: 800;
+      font-size: 13px;
+    }
+
+    /* Sub-header Variant Switcher Bar (Inspired by ngx-color-picker) */
+    .variant-bar {
+      background-color: var(--demo-surface);
+      border-bottom: 1px solid var(--demo-border);
+      padding: 8px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .variant-pills {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .variant-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--demo-muted);
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .variant-btn:hover {
+      color: var(--demo-text);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .variant-btn.is-active {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
       font-size: 12px;
     }
 
+    .segmented-control {
+      display: inline-flex;
+      background: var(--demo-border);
+      padding: 2px;
+      border-radius: 8px;
+    }
+
+    .segmented-item {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--demo-muted);
+      transition: all 0.15s ease;
+    }
+
+    .segmented-item.is-active {
+      background: var(--demo-surface);
+      color: var(--demo-text);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Main Stage */
     .canvas-stage {
       flex: 1;
       display: grid;
       grid-template-columns: 1fr 360px;
       min-height: calc(100vh - 52px);
+      grid-template-columns: 1fr 380px;
+      min-height: calc(100vh - 108px);
     }
 
     .artboard {
@@ -63,16 +170,22 @@
       justify-content: center;
       padding: 40px;
       background: radial-gradient(circle at center, #1c1917 0%, #0c0a09 100%);
+      background: radial-gradient(circle at center, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
       position: relative;
     }
 
     .preview-card {
       width: 380px;
       padding: 32px;
+      width: 400px;
+      padding: 28px;
       border-radius: 16px;
       background: #18181b;
       border: 1px solid #27272a;
-      box-shadow: 0 20px 40px -15px rgba(0,0,0,0.7);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+      background: var(--demo-surface);
+      border: 1px solid var(--demo-border);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
       display: flex;
       flex-direction: column;
       gap: 20px;
@@ -83,17 +196,25 @@
       align-items: center;
       gap: 12px;
     }
+
     .preview-chip {
       width: 44px;
       height: 44px;
       border-radius: 10px;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2);
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+      flex-shrink: 0;
+      overflow: hidden;
     }
 
     .sidebar {
       background-color: #18181b;
       border-left: 1px solid #27272a;
+      background-color: var(--demo-surface);
+      border-left: 1px solid var(--demo-border);
       padding: 24px;
       display: flex;
       flex-direction: column;
@@ -107,6 +228,7 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: #a1a1aa;
+      color: var(--demo-muted);
       margin-bottom: 10px;
     }
 
@@ -117,13 +239,59 @@
       font-size: 12px;
       padding: 6px 0;
       border-bottom: 1px solid #27272a;
+      border-bottom: 1px solid var(--demo-border);
     }
-    .prop-label { color: #a1a1aa; }
-    .prop-val { font-family: ui-monospace, monospace; font-weight: 500; color: #fafafa; }
+
+    .prop-label {
+      color: #a1a1aa;
+    }
+
+    .prop-val {
+      font-family: ui-monospace, monospace;
+      font-weight: 500;
+      color: #fafafa;
+    }
+
+    .prop-label {
+      color: var(--demo-muted);
+    }
+
+    .prop-val {
+      font-family: ui-monospace, monospace;
+      font-weight: 500;
+      color: var(--demo-text);
+    }
+
+    .code-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 2px;
+      border-radius: 6px;
+    }
+
+    .code-tab-btn {
+      flex: 1;
+      padding: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      color: var(--demo-muted);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .code-tab-btn.is-active {
+      background: #2563eb;
+      color: #ffffff;
+    }
 
     .code-block {
       background: #09090b;
       border: 1px solid #27272a;
+      border: 1px solid var(--demo-border);
       border-radius: 8px;
       padding: 12px;
       font-family: ui-monospace, monospace;
@@ -131,9 +299,11 @@
       color: #38bdf8;
       overflow-x: auto;
       line-height: 1.5;
+      white-space: pre;
     }
   </style>
 </head>
+
 <body class="mdx-theme-dark">
 
   <!-- Header -->
@@ -142,496 +312,986 @@
       <div class="brand-mark">M</div>
       <span>Madelixa Color</span>
       <span style="font-size: 11px; color: #a1a1aa; font-weight: normal; margin-left: 4px;">v0.1.0 Design Tool</span>
+      <span>Madelixa Color Picker</span>
+      <span style="font-size: 11px; color: var(--demo-muted); font-weight: normal; margin-left: 4px;">Universal UI
+        Suite</span>
     </div>
     <div style="display: flex; gap: 8px;">
-      <a href="https://github.com/madelixa/madelixa-color" target="_blank" style="color: #a1a1aa; text-decoration: none; font-size: 12px; padding: 6px 12px; border: 1px solid #27272a; border-radius: 6px;">GitHub</a>
-    </div>
+      <a href="https://github.com/madelixa/madelixa-color" target="_blank"
+        style="color: #a1a1aa; text-decoration: none; font-size: 12px; padding: 6px 12px; border: 1px solid #27272a; border-radius: 6px;">GitHub</a>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <button type="button" id="btn-theme-toggle" class="segmented-item"
+          style="border: 1px solid var(--demo-border); padding: 5px 12px;">
+          🌓 Toggle Theme
+        </button>
+        <a href="https://github.com/madelixa/madelixa-color" target="_blank"
+          style="color: var(--demo-text); text-decoration: none; font-size: 12px; padding: 6px 14px; border: 1px solid var(--demo-border); border-radius: 6px; font-weight: 500;">
+          GitHub
+        </a>
+      </div>
   </header>
 
   <!-- Studio Stage -->
+  <!-- Reference Variant Switcher Bar -->
+  <div class="variant-bar">
+    <div class="variant-pills">
+      <button type="button" class="variant-btn is-active" data-variant="chrome">🌟 Chrome Picker</button>
+      <button type="button" class="variant-btn" data-variant="sketch">🎨 Sketch Picker</button>
+      <button type="button" class="variant-btn" data-variant="compact">⚡ Compact Picker</button>
+      <button type="button" class="variant-btn" data-variant="github">🐙 GitHub Picker</button>
+      <button type="button" class="variant-btn" data-variant="swatches">📑 Swatches Picker</button>
+    </div>
+
+    <div class="controls-group">
+      <span style="color: var(--demo-muted); font-weight: 500;">Display Mode:</span>
+      <div class="segmented-control">
+        <button type="button" class="segmented-item" data-mode="popover">Popover Trigger</button>
+        <button type="button" class="segmented-item is-active" data-mode="inline">Inline Embedded</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage -->
   <div class="canvas-stage">
-    
+
     <!-- Left: Visual Artboard & Popover Trigger -->
+    <!-- Artboard -->
     <div class="artboard">
-      
+
       <div class="preview-card">
         <div class="preview-card-header">
           <div id="preview-chip" class="preview-chip mdx-cp-track-checkered">
-            <div id="preview-chip-fill" style="width: 100%; height: 100%; background-color: #3b82f6;"></div>
-          </div>
-          <div>
-            <div style="font-weight: 600; font-size: 14px;">Selected Brand Accent</div>
-            <div id="preview-chip-text" style="font-size: 12px; color: #a1a1aa; font-family: ui-monospace, monospace;">#3b82f6</div>
-          </div>
-        </div>
-
-        <div style="font-size: 12px; color: #a1a1aa; line-height: 1.5;">
-          Click the color trigger below to inspect the floating popover with high-DPI OKLCH canvas, real-time WCAG 2.1 contrast, and 1-click Auto-Fix.
-        </div>
-
-        <!-- Custom Color Picker Trigger & Floating Popover -->
-        <div class="mdx-color-picker" style="position: relative;">
-          
-          <button type="button" id="demo-trigger" class="mdx-cp-trigger" aria-haspopup="dialog" aria-expanded="false">
-            <span class="mdx-cp-trigger-swatch mdx-cp-track-checkered">
-              <span id="trigger-fill" style="display: block; width: 100%; height: 100%; background-color: #3b82f6;"></span>
-            </span>
-            <span id="trigger-text" class="mdx-cp-trigger-text">#3b82f6</span>
-            <span id="btn-sample-screen" class="mdx-cp-btn" style="width: 22px; height: 22px; padding: 0;" title="EyeDropper">💉</span>
-          </button>
-
-          <!-- Floating 320px Popover -->
-          <div id="demo-popover" class="mdx-cp-popover" style="display: none; position: absolute; top: calc(100% + 8px); left: 0;">
-            
-            <!-- Zone 1: Mode Switcher -->
-            <div class="mdx-cp-tabs">
-              <button type="button" class="mdx-cp-tab is-active" data-tab="solid">Solid</button>
-              <button type="button" class="mdx-cp-tab" data-tab="gradient">Gradient</button>
-              <button type="button" class="mdx-cp-tab" data-tab="harmonies">Harmonies</button>
-              <button type="button" class="mdx-cp-tab" data-tab="scales">Scales</button>
+            <div class="preview-chip mdx-cp-track-checkered">
+              <div id="preview-chip-fill" style="width: 100%; height: 100%; background-color: #3b82f6;"></div>
+            </div>
+            <div>
+              <div style="font-weight: 600; font-size: 14px;">Selected Brand Accent</div>
+              <div id="preview-chip-text"
+                style="font-size: 12px; color: #a1a1aa; font-family: ui-monospace, monospace;">#3b82f6</div>
+              <div style="flex: 1;">
+                <div id="variant-label" style="font-weight: 600; font-size: 14px;">Chrome Picker (Inline)</div>
+                <div id="preview-chip-text"
+                  style="font-size: 12px; color: var(--demo-muted); font-family: ui-monospace, monospace;">#3b82f6</div>
+              </div>
             </div>
 
-            <!-- Solid Mode Content -->
-            <div id="panel-solid" style="display: flex; flex-direction: column; gap: 10px;">
-              
-              <!-- Zone 2: 2D OKLCH Canvas -->
-              <div id="canvas-wrapper" class="mdx-cp-canvas-area">
-                <canvas id="color-canvas" width="296" height="160"></canvas>
-                <div id="canvas-thumb" class="mdx-cp-thumb" style="left: 70%; top: 30%; background-color: #3b82f6; border: 2px solid #ffffff;"></div>
-              </div>
+            <div style="font-size: 12px; color: #a1a1aa; line-height: 1.5;">
+              Click the color trigger below to inspect the floating popover with high-DPI OKLCH canvas, real-time WCAG
+              2.1 contrast, and 1-click Auto-Fix.
+            </div>
 
-              <!-- Zone 3: Hue & Alpha Sliders -->
-              <div style="display: flex; flex-direction: column; gap: 8px;">
-                <div class="mdx-cp-slider-row">
-                  <span class="mdx-cp-slider-label">H</span>
-                  <div class="mdx-cp-track mdx-cp-track-hue">
-                    <input type="range" id="slider-hue" min="0" max="360" step="0.5" value="217" class="mdx-cp-range-input" />
-                  </div>
-                </div>
+            <!-- Custom Color Picker Trigger & Floating Popover -->
+            <div class="mdx-color-picker" style="position: relative;">
+              <!-- Color Picker Host Container -->
+              <div id="picker-host" class="mdx-color-picker"
+                style="position: relative; width: 100%; display: flex; justify-content: center;">
 
-                <div class="mdx-cp-slider-row">
-                  <span class="mdx-cp-slider-label">A</span>
-                  <div class="mdx-cp-track mdx-cp-track-checkered">
-                    <div id="alpha-gradient-overlay" class="mdx-cp-alpha-overlay"></div>
-                    <input type="range" id="slider-alpha" min="0" max="100" step="1" value="100" class="mdx-cp-range-input" />
-                  </div>
-                </div>
-              </div>
-
-              <!-- Zone 4: Multi-Format Inputs Row -->
-              <div class="mdx-cp-inputs-row">
-                <select id="format-select" class="mdx-cp-select">
-                  <option value="hex">HEX</option>
-                  <option value="rgb">RGB</option>
-                  <option value="hsl">HSL</option>
-                  <option value="oklch" selected>OKLCH</option>
-                  <option value="p3">P3</option>
-                </select>
-                <div class="mdx-cp-input-group">
-                  <input type="text" id="color-input" class="mdx-cp-field" value="#3b82f6" />
-                </div>
-              </div>
-
-              <!-- Zone 5: A11y & Swatches Footer -->
-              <div class="mdx-cp-footer">
-                <div class="mdx-cp-a11y-bar">
-                  <div style="display: flex; align-items: center; gap: 6px;">
-                    <span style="color: var(--mdx-cp-text-secondary);">vs #FFF:</span>
-                    <span id="contrast-readout" style="font-family: var(--mdx-cp-font-mono); font-weight: 700;">4.56:1</span>
-                    <span id="badge-aa" class="mdx-cp-pill mdx-cp-pill-pass">AA ✓</span>
-                  </div>
-                  <button type="button" id="btn-autofix" class="mdx-cp-btn mdx-cp-btn-primary">
-                    ⚡ Auto-Fix
+                <button type="button" id="demo-trigger" class="mdx-cp-trigger" aria-haspopup="dialog"
+                  aria-expanded="false">
+                  <!-- Popover Trigger Button (Only in popover mode) -->
+                  <button type="button" id="demo-trigger" class="mdx-cp-trigger" style="display: none;"
+                    aria-haspopup="dialog" aria-expanded="false">
+                    <span class="mdx-cp-trigger-swatch mdx-cp-track-checkered">
+                      <span id="trigger-fill"
+                        style="display: block; width: 100%; height: 100%; background-color: #3b82f6;"></span>
+                    </span>
+                    <span id="trigger-text" class="mdx-cp-trigger-text">#3b82f6</span>
+                    <span id="btn-sample-screen" class="mdx-cp-btn" style="width: 22px; height: 22px; padding: 0;"
+                      title="EyeDropper">💉</span>
                   </button>
-                </div>
 
-                <div class="mdx-cp-swatches">
-                  <span style="font-size: var(--mdx-cp-font-size-xs); color: var(--mdx-cp-text-muted);">Saved:</span>
-                  <div class="mdx-cp-swatch-list">
-                    <button type="button" class="mdx-cp-swatch-btn" style="background:#ef4444" data-color="#ef4444"></button>
-                    <button type="button" class="mdx-cp-swatch-btn" style="background:#f59e0b" data-color="#f59e0b"></button>
-                    <button type="button" class="mdx-cp-swatch-btn" style="background:#10b981" data-color="#10b981"></button>
-                    <button type="button" class="mdx-cp-swatch-btn" style="background:#3b82f6" data-color="#3b82f6"></button>
-                    <button type="button" class="mdx-cp-swatch-btn" style="background:#8b5cf6" data-color="#8b5cf6"></button>
-                    <button type="button" class="mdx-cp-swatch-btn" style="background:#ec4899" data-color="#ec4899"></button>
+                  <!-- Floating 320px Popover -->
+                  <div id="demo-popover" class="mdx-cp-popover"
+                    style="display: none; position: absolute; top: calc(100% + 8px); left: 0;">
+
+                    <!-- Zone 1: Mode Switcher -->
+                    <!-- 1. CHROME VARIANT -->
+                    <div id="variant-chrome" class="mdx-cp-popover mdx-cp-popover--chrome mdx-cp-popover--inline">
+                      <div class="mdx-cp-tabs">
+                        <button type="button" class="mdx-cp-tab is-active" data-tab="solid">Solid</button>
+                        <button type="button" class="mdx-cp-tab" data-tab="gradient">Gradient</button>
+                        <button type="button" class="mdx-cp-tab" data-tab="harmonies">Harmonies</button>
+                        <button type="button" class="mdx-cp-tab" data-tab="scales">Scales</button>
+                      </div>
+
+                      <!-- Solid Mode Content -->
+                      <div id="panel-solid" style="display: flex; flex-direction: column; gap: 10px;">
+
+                        <!-- Zone 2: 2D OKLCH Canvas -->
+                        <!-- 2D Canvas -->
+                        <div id="canvas-wrapper" class="mdx-cp-canvas-area">
+                          <canvas id="color-canvas" width="296" height="160"></canvas>
+                          <canvas id="color-canvas" width="294" height="160"></canvas>
+                          <div id="canvas-thumb" class="mdx-cp-thumb"
+                            style="left: 70%; top: 30%; background-color: #3b82f6; border: 2px solid #ffffff;"></div>
+                        </div>
+
+                        <!-- Zone 3: Hue & Alpha Sliders -->
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                          <div class="mdx-cp-slider-row">
+                            <span class="mdx-cp-slider-label">H</span>
+                            <!-- Sliders & Preview Circle -->
+                            <div class="mdx-cp-chrome-preview">
+                              <div class="mdx-cp-color-circle mdx-cp-track-checkered">
+                                <div id="circle-preview" style="width: 100%; height: 100%; background-color: #3b82f6;">
+                                </div>
+                              </div>
+
+                              <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+                                <div class="mdx-cp-track mdx-cp-track-hue">
+                                  <input type="range" id="slider-hue" min="0" max="360" step="0.5" value="217"
+                                    class="mdx-cp-range-input" />
+                                </div>
+                              </div>
+
+                              <div class="mdx-cp-slider-row">
+                                <span class="mdx-cp-slider-label">A</span>
+                                <div class="mdx-cp-track mdx-cp-track-checkered">
+                                  <div id="alpha-gradient-overlay" class="mdx-cp-alpha-overlay"></div>
+                                  <input type="range" id="slider-alpha" min="0" max="100" step="1" value="100"
+                                    class="mdx-cp-range-input" />
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- Zone 4: Multi-Format Inputs Row -->
+                            <!-- Format & Input -->
+                            <div class="mdx-cp-inputs-row">
+                              <select id="format-select" class="mdx-cp-select">
+                                <option value="hex">HEX</option>
+                                <option value="rgb">RGB</option>
+                                <option value="hsl">HSL</option>
+                                <option value="oklch" selected>OKLCH</option>
+                                <option value="p3">P3</option>
+                              </select>
+                              <div class="mdx-cp-input-group">
+                                <input type="text" id="color-input" class="mdx-cp-field" value="#3b82f6" />
+                              </div>
+                            </div>
+
+                            <!-- Zone 5: A11y & Swatches Footer -->
+                            <!-- Footer with A11y & Swatches -->
+                            <div class="mdx-cp-footer">
+                              <div class="mdx-cp-a11y-bar">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                  <span style="color: var(--mdx-cp-text-secondary);">vs #FFF:</span>
+                                  <span id="contrast-readout"
+                                    style="font-family: var(--mdx-cp-font-mono); font-weight: 700;">4.56:1</span>
+                                  <span id="badge-aa" class="mdx-cp-pill mdx-cp-pill-pass">AA ✓</span>
+                                </div>
+                                <button type="button" id="btn-autofix" class="mdx-cp-btn mdx-cp-btn-primary">
+                                  ⚡ Auto-Fix
+                                </button>
+                              </div>
+
+                              <div class="mdx-cp-swatches">
+                                <span
+                                  style="font-size: var(--mdx-cp-font-size-xs); color: var(--mdx-cp-text-muted);">Saved:</span>
+                                <span
+                                  style="font-size: var(--mdx-cp-font-size-xs); color: var(--mdx-cp-text-muted);">Presets:</span>
+                                <div class="mdx-cp-swatch-list">
+                                  <button type="button" class="mdx-cp-swatch-btn" style="background:#ef4444"
+                                    data-color="#ef4444"></button>
+                                  <button type="button" class="mdx-cp-swatch-btn" style="background:#f97316"
+                                    data-color="#f97316"></button>
+                                  <button type="button" class="mdx-cp-swatch-btn" style="background:#f59e0b"
+                                    data-color="#f59e0b"></button>
+                                  <button type="button" class="mdx-cp-swatch-btn" style="background:#10b981"
+                                    data-color="#10b981"></button>
+                                  <button type="button" class="mdx-cp-swatch-btn" style="background:#06b6d4"
+                                    data-color="#06b6d4"></button>
+                                  <button type="button" class="mdx-cp-swatch-btn" style="background:#3b82f6"
+                                    data-color="#3b82f6"></button>
+                                  <button type="button" class="mdx-cp-swatch-btn" style="background:#8b5cf6"
+                                    data-color="#8b5cf6"></button>
+                                  <button type="button" class="mdx-cp-swatch-btn" style="background:#ec4899"
+                                    data-color="#ec4899"></button>
+                                </div>
+                              </div>
+                            </div>
+
+                          </div>
+
+                          <!-- Harmonies Mode -->
+                          <!-- Harmonies -->
+                          <div id="panel-harmonies"
+                            style="display: none; flex-direction: column; gap: 10px; font-size: 11px;">
+                            <span style="color: #a1a1aa; font-weight: 600;">COMPLEMENTARY (+180°)</span>
+                            <span style="color: var(--demo-muted); font-weight: 600;">COMPLEMENTARY (+180°)</span>
+                            <div id="harmonies-comp" style="display: flex; gap: 6px; height: 28px;"></div>
+                            <span style="color: #a1a1aa; font-weight: 600; margin-top: 4px;">TRIADIC (+120°,
+                              +240°)</span>
+                            <span style="color: var(--demo-muted); font-weight: 600; margin-top: 4px;">TRIADIC (+120°,
+                              +240°)</span>
+                            <div id="harmonies-triad" style="display: flex; gap: 6px; height: 28px;"></div>
+                            <span style="color: #a1a1aa; font-weight: 600; margin-top: 4px;">ANALOGOUS (±30°)</span>
+                            <span style="color: var(--demo-muted); font-weight: 600; margin-top: 4px;">ANALOGOUS
+                              (±30°)</span>
+                            <div id="harmonies-analog" style="display: flex; gap: 6px; height: 28px;"></div>
+                          </div>
+
+                          <!-- Scales Mode -->
+                          <!-- Scales -->
+                          <div id="panel-scales" style="display: none; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                              <span style="font-size: 11px; color: #a1a1aa; font-weight: 600;">TAILWIND 50–950</span>
+                              <span style="font-size: 11px; color: var(--demo-muted); font-weight: 600;">TAILWIND
+                                50–950</span>
+                              <button type="button" id="btn-copy-css-vars" class="mdx-cp-btn">Copy CSS</button>
+                            </div>
+                            <div id="scales-container"
+                              style="display: grid; grid-template-columns: repeat(11, 1fr); gap: 2px; height: 32px;">
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- 2. SKETCH VARIANT -->
+                        <div id="variant-sketch" class="mdx-cp-popover mdx-cp-popover--sketch mdx-cp-popover--inline"
+                          style="display: none;">
+                          <div class="mdx-cp-sketch-fields" style="margin-bottom: 8px;">
+                            <div class="mdx-cp-sketch-col">
+                              <input type="text" id="sketch-hex" class="mdx-cp-field" value="#3b82f6" />
+                              <label>HEX</label>
+                            </div>
+                            <div class="mdx-cp-sketch-col">
+                              <input type="number" id="sketch-r" class="mdx-cp-field" value="59" min="0" max="255" />
+                              <label>R</label>
+                            </div>
+                            <div class="mdx-cp-sketch-col">
+                              <input type="number" id="sketch-g" class="mdx-cp-field" value="130" min="0" max="255" />
+                              <label>G</label>
+                            </div>
+                            <div class="mdx-cp-sketch-col">
+                              <input type="number" id="sketch-b" class="mdx-cp-field" value="246" min="0" max="255" />
+                              <label>B</label>
+                            </div>
+                          </div>
+
+                          <div class="mdx-cp-swatches">
+                            <div class="mdx-cp-swatch-list">
+                              <button type="button" class="mdx-cp-swatch-btn" style="background:#ef4444"
+                                data-color="#ef4444"></button>
+                              <button type="button" class="mdx-cp-swatch-btn" style="background:#f97316"
+                                data-color="#f97316"></button>
+                              <button type="button" class="mdx-cp-swatch-btn" style="background:#f59e0b"
+                                data-color="#f59e0b"></button>
+                              <button type="button" class="mdx-cp-swatch-btn" style="background:#10b981"
+                                data-color="#10b981"></button>
+                              <button type="button" class="mdx-cp-swatch-btn" style="background:#3b82f6"
+                                data-color="#3b82f6"></button>
+                              <button type="button" class="mdx-cp-swatch-btn" style="background:#8b5cf6"
+                                data-color="#8b5cf6"></button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- 3. COMPACT VARIANT -->
+                        <div id="variant-compact" class="mdx-cp-popover mdx-cp-popover--compact mdx-cp-popover--inline"
+                          style="display: none;">
+                          <div class="mdx-cp-compact-grid">
+                            <button type="button" class="mdx-cp-compact-swatch" style="background:#ef4444"
+                              data-color="#ef4444"></button>
+                            <button type="button" class="mdx-cp-compact-swatch" style="background:#f97316"
+                              data-color="#f97316"></button>
+                            <button type="button" class="mdx-cp-compact-swatch" style="background:#f59e0b"
+                              data-color="#f59e0b"></button>
+                            <button type="button" class="mdx-cp-compact-swatch" style="background:#10b981"
+                              data-color="#10b981"></button>
+                            <button type="button" class="mdx-cp-compact-swatch" style="background:#06b6d4"
+                              data-color="#06b6d4"></button>
+                            <button type="button" class="mdx-cp-compact-swatch" style="background:#3b82f6"
+                              data-color="#3b82f6"></button>
+                            <button type="button" class="mdx-cp-compact-swatch" style="background:#6366f1"
+                              data-color="#6366f1"></button>
+                            <button type="button" class="mdx-cp-compact-swatch" style="background:#8b5cf6"
+                              data-color="#8b5cf6"></button>
+                            <button type="button" class="mdx-cp-compact-swatch" style="background:#ec4899"
+                              data-color="#ec4899"></button>
+                            <button type="button" class="mdx-cp-compact-swatch" style="background:#ffffff"
+                              data-color="#ffffff"></button>
+                            <button type="button" class="mdx-cp-compact-swatch" style="background:#71717a"
+                              data-color="#71717a"></button>
+                            <button type="button" class="mdx-cp-compact-swatch" style="background:#18181b"
+                              data-color="#18181b"></button>
+                          </div>
+                          <div class="mdx-cp-track mdx-cp-track-hue" style="height: 10px; margin-top: 8px;">
+                            <input type="range" id="compact-slider-hue" min="0" max="360" step="0.5" value="217"
+                              class="mdx-cp-range-input" />
+                          </div>
+                          <div style="display: flex; gap: 6px; align-items: center; margin-top: 6px;">
+                            <span id="compact-swatch-indicator" class="mdx-cp-swatch-btn"
+                              style="background-color: #3b82f6;"></span>
+                            <input type="text" id="compact-hex-input" class="mdx-cp-field" value="#3b82f6" />
+                          </div>
+                        </div>
+
+                        <!-- 4. GITHUB VARIANT -->
+                        <div id="variant-github" class="mdx-cp-popover mdx-cp-popover--github mdx-cp-popover--inline"
+                          style="display: none;">
+                          <div class="mdx-cp-github-arrow" style="display: none;"></div>
+                          <div class="mdx-cp-github-grid">
+                            <button type="button" class="mdx-cp-github-swatch" style="background:#b80000"
+                              data-color="#b80000"></button>
+                            <button type="button" class="mdx-cp-github-swatch" style="background:#db3e00"
+                              data-color="#db3e00"></button>
+                            <button type="button" class="mdx-cp-github-swatch" style="background:#fccb00"
+                              data-color="#fccb00"></button>
+                            <button type="button" class="mdx-cp-github-swatch" style="background:#008b02"
+                              data-color="#008b02"></button>
+                            <button type="button" class="mdx-cp-github-swatch" style="background:#006b76"
+                              data-color="#006b76"></button>
+                            <button type="button" class="mdx-cp-github-swatch" style="background:#1273de"
+                              data-color="#1273de"></button>
+                            <button type="button" class="mdx-cp-github-swatch" style="background:#004dcf"
+                              data-color="#004dcf"></button>
+                            <button type="button" class="mdx-cp-github-swatch" style="background:#5300eb"
+                              data-color="#5300eb"></button>
+                            <button type="button" class="mdx-cp-github-swatch" style="background:#eb9694"
+                              data-color="#eb9694"></button>
+                            <button type="button" class="mdx-cp-github-swatch" style="background:#fad0c3"
+                              data-color="#fad0c3"></button>
+                            <button type="button" class="mdx-cp-github-swatch" style="background:#fef3bd"
+                              data-color="#fef3bd"></button>
+                            <button type="button" class="mdx-cp-github-swatch" style="background:#c1e1c5"
+                              data-color="#c1e1c5"></button>
+                            <button type="button" class="mdx-cp-github-swatch" style="background:#bedadc"
+                              data-color="#bedadc"></button>
+                            <button type="button" class="mdx-cp-github-swatch" style="background:#c4def6"
+                              data-color="#c4def6"></button>
+                            <button type="button" class="mdx-cp-github-swatch" style="background:#bed3f3"
+                              data-color="#bed3f3"></button>
+                            <button type="button" class="mdx-cp-github-swatch" style="background:#d4c4fb"
+                              data-color="#d4c4fb"></button>
+                          </div>
+                        </div>
+
+                        <!-- 5. SWATCHES VARIANT -->
+                        <div id="variant-swatches"
+                          class="mdx-cp-popover mdx-cp-popover--swatches mdx-cp-popover--inline" style="display: none;">
+                          <div id="swatches-columns-container" class="mdx-cp-swatches-columns"></div>
+                        </div>
+
+                      </div>
+
+                    </div>
+
                   </div>
-                </div>
+
+                  <!-- Right: Studio Inspector Sidebar -->
+                  <!-- Sidebar -->
+                  <div class="sidebar">
+
+                    <!-- Color Space Coordinates -->
+                    <div>
+                      <div class="section-title">Color Space Coordinates</div>
+                      <div class="prop-row">
+                        <span class="prop-label">OKLCH</span>
+                        <span id="inspect-oklch" class="prop-val">62.3% 0.214 259.8</span>
+                      </div>
+                      <div class="prop-row">
+                        <span class="prop-label">sRGB Hex</span>
+                        <span id="inspect-hex" class="prop-val">#3b82f6</span>
+                      </div>
+                      <div class="prop-row">
+                        <span class="prop-label">Display P3</span>
+                        <span id="inspect-p3" class="prop-val">color(display-p3 0.23 0.51 0.96)</span>
+                      </div>
+                      <div class="prop-row">
+                        <span class="prop-label">WCAG 2.1 (vs #FFF)</span>
+                        <span id="inspect-wcag" class="prop-val">4.56:1</span>
+                        <span class="prop-label">WCAG 2.1 Contrast</span>
+                        <span id="inspect-wcag" class="prop-val">4.56:1 (AA Compliant)</span>
+                      </div>
+                      <div class="prop-row">
+                        <span class="prop-label">APCA Lc Score</span>
+                        <span id="inspect-apca" class="prop-val">Lc -68 (Good for Body)</span>
+                      </div>
+                    </div>
+
+                    <!-- Framework Usage Generator -->
+                    <div>
+                      <div class="section-title">Production Usage</div>
+                      <div class="code-block">// Angular Standalone (Signals + CVA)
+                        &lt;madelixa-color-picker
+                        [(ngModel)]="brandColor"
+                        format="oklch"
+                        [minContrastRatio]="4.5"
+                        /&gt;
+                        <div class="section-title">Drop-in Framework Integration</div>
+                        <div class="code-tabs">
+                          <button type="button" class="code-tab-btn is-active" data-lang="angular">Angular</button>
+                          <button type="button" class="code-tab-btn" data-lang="react">React</button>
+                          <button type="button" class="code-tab-btn" data-lang="wc">Web Component</button>
+                        </div>
+                        <div id="code-snippet-display" class="code-block"></div>
+                      </div>
+
+                      // React 18+ (Compound Components)
+                      &lt;ColorPicker.Root value={color}&gt;
+                      &lt;ColorPicker.Trigger /&gt;
+                      &lt;ColorPicker.Popover&gt;
+                      &lt;ColorPicker.Canvas /&gt;
+                      &lt;ColorPicker.Sliders /&gt;
+                      &lt;/ColorPicker.Popover&gt;
+                      &lt;/ColorPicker.Root&gt;
+                    </div>
+                    <!-- Advantage vs Legacy ngx-color-picker -->
+                    <div>
+                      <div class="section-title">Why Madelixa vs Legacy ngx-color-picker</div>
+                      <div
+                        style="display: flex; flex-direction: column; gap: 8px; font-size: 11px; line-height: 1.5; color: var(--demo-muted);">
+                        <div>✨ <strong>OKLCH & Display P3:</strong> Linear lightness without unexpected hue shifts or
+                          Retina clipping.</div>
+                        <div>⚡ <strong>1-Click Contrast Auto-Fix:</strong> Automatically reaches WCAG AA (4.5:1) while
+                          strictly preserving brand hue.</div>
+                        <div>🚀 <strong>Universal:</strong> Angular Standalone + Signals, React Compound Components, and
+                          Web Components from one core.</div>
+                      </div>
+                    </div>
+
+                  </div>
+
               </div>
 
-            </div>
+              <script type="module">
+                import {
+                  rgbToOklch,
+                  oklchToRgb,
+                  rgbToHex,
+                  hexToRgb,
+                  getRelativeLuminance,
+                  calculateWcagRatio,
+                  calculateApcaContrast,
+                  autoFixContrast,
+                  formatColor,
+                  generateHarmonies,
+                  generateTailwindScale,
+                  toCssVariables
+                } from '../packages/core/src/index.ts';
 
-            <!-- Harmonies Mode -->
-            <div id="panel-harmonies" style="display: none; flex-direction: column; gap: 10px; font-size: 11px;">
-              <span style="color: #a1a1aa; font-weight: 600;">COMPLEMENTARY (+180°)</span>
-              <div id="harmonies-comp" style="display: flex; gap: 6px; height: 28px;"></div>
-              <span style="color: #a1a1aa; font-weight: 600; margin-top: 4px;">TRIADIC (+120°, +240°)</span>
-              <div id="harmonies-triad" style="display: flex; gap: 6px; height: 28px;"></div>
-              <span style="color: #a1a1aa; font-weight: 600; margin-top: 4px;">ANALOGOUS (±30°)</span>
-              <div id="harmonies-analog" style="display: flex; gap: 6px; height: 28px;"></div>
-            </div>
+                // Application State
+                // State
+                const state = {
+                  l: 0.623,
+                  c: 0.214,
+                  h: 217.0,
+                  alpha: 1.0,
+                  format: 'oklch',
+                  isOpen: false,
+                  activeVariant: 'chrome',
+                  displayMode: 'inline',
+                  isPopoverOpen: false,
+                  activeTab: 'solid'
+                };
 
-            <!-- Scales Mode -->
-            <div id="panel-scales" style="display: none; flex-direction: column; gap: 8px;">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 11px; color: #a1a1aa; font-weight: 600;">TAILWIND 50–950</span>
-                <button type="button" id="btn-copy-css-vars" class="mdx-cp-btn">Copy CSS</button>
-              </div>
-              <div id="scales-container" style="display: grid; grid-template-columns: repeat(11, 1fr); gap: 2px; height: 32px;"></div>
-            </div>
+                // DOM Elements
+                const trigger = document.getElementById('demo-trigger');
+                const popover = document.getElementById('demo-popover');
+                const SWATCH_COLUMNS = [
+                  ['#fee2e2', '#fca5a5', '#f87171', '#ef4444', '#dc2626', '#991b1b'], // Reds
+                  ['#ffedd5', '#fdba74', '#fb923c', '#f97316', '#ea580c', '#9a3412'], // Oranges
+                  ['#fef3c7', '#fde047', '#facc15', '#eab308', '#ca8a04', '#854d0e'], // Yellows
+                  ['#dcfce7', '#86efac', '#4ade80', '#22c55e', '#16a34a', '#166534'], // Greens
+                  ['#e0f2fe', '#7dd3fc', '#38bdf8', '#0ea5e9', '#0284c7', '#075985'], // Sky
+                  ['#dbeafe', '#93c5fd', '#60a5fa', '#3b82f6', '#2563eb', '#1e40af'], // Blue
+                  ['#f3e8ff', '#d8b4fe', '#c084fc', '#a855f7', '#9333ea', '#6b21a8'], // Purple
+                  ['#f4f4f5', '#e4e4e7', '#a1a1aa', '#71717a', '#3f3f46', '#18181b']  // Neutrals
+                ];
 
-          </div>
+                // Elements
+                const previewChipFill = document.getElementById('preview-chip-fill');
+                const previewChipText = document.getElementById('preview-chip-text');
+                const variantLabel = document.getElementById('variant-label');
+                const demoTrigger = document.getElementById('demo-trigger');
+                const triggerFill = document.getElementById('trigger-fill');
+                const triggerText = document.getElementById('trigger-text');
+                const previewChipFill = document.getElementById('preview-chip-fill');
+                const previewChipText = document.getElementById('preview-chip-text');
+                const circlePreview = document.getElementById('circle-preview');
+                const colorCanvas = document.getElementById('color-canvas');
+                const canvasThumb = document.getElementById('canvas-thumb');
+                const canvasWrapper = document.getElementById('canvas-wrapper');
+                const sliderHue = document.getElementById('slider-hue');
+                const sliderAlpha = document.getElementById('slider-alpha');
+                const alphaOverlay = document.getElementById('alpha-gradient-overlay');
+                const formatSelect = document.getElementById('format-select');
+                const colorInput = document.getElementById('color-input');
+                const contrastReadout = document.getElementById('contrast-readout');
+                const badgeAa = document.getElementById('badge-aa');
+                const btnAutofix = document.getElementById('btn-autofix');
+                const inspectOklch = document.getElementById('inspect-oklch');
+                const inspectHex = document.getElementById('inspect-hex');
+                const inspectP3 = document.getElementById('inspect-p3');
+                const inspectWcag = document.getElementById('inspect-wcag');
+                const btnSampleScreen = document.getElementById('btn-sample-screen');
+                const inspectApca = document.getElementById('inspect-apca');
+                const codeSnippetDisplay = document.getElementById('code-snippet-display');
+                const compactSliderHue = document.getElementById('compact-slider-hue');
+                const compactHexInput = document.getElementById('compact-hex-input');
+                const compactSwatchIndicator = document.getElementById('compact-swatch-indicator');
+                const sketchHex = document.getElementById('sketch-hex');
+                const sketchR = document.getElementById('sketch-r');
+                const sketchG = document.getElementById('sketch-g');
+                const sketchB = document.getElementById('sketch-b');
 
-        </div>
-
+                // Popover Toggle
+                trigger.addEventListener('click', (e) => {
+                  // Build Swatches Columns
+                  const swatchesContainer = document.getElementById('swatches-columns-container');
+                  swatchesContainer.innerHTML = SWATCH_COLUMNS.map(col => `
+      <div class="mdx-cp-swatches-col">
+        ${col.map(shade => `
+          <button type="button" class="mdx-cp-swatch-item" style="background-color: ${shade};" data-color="${shade}"></button>
+        `).join('')}
       </div>
+    `).join('');
 
-    </div>
+                  // Theme Toggle
+                  document.getElementById('btn-theme-toggle').addEventListener('click', () => {
+                    document.body.classList.toggle('light-mode');
+                    document.body.classList.toggle('mdx-theme-dark');
+                  });
 
-    <!-- Right: Studio Inspector Sidebar -->
-    <div class="sidebar">
-      <div>
-        <div class="section-title">Color Space Coordinates</div>
-        <div class="prop-row">
-          <span class="prop-label">OKLCH</span>
-          <span id="inspect-oklch" class="prop-val">62.3% 0.214 259.8</span>
-        </div>
-        <div class="prop-row">
-          <span class="prop-label">sRGB Hex</span>
-          <span id="inspect-hex" class="prop-val">#3b82f6</span>
-        </div>
-        <div class="prop-row">
-          <span class="prop-label">Display P3</span>
-          <span id="inspect-p3" class="prop-val">color(display-p3 0.23 0.51 0.96)</span>
-        </div>
-        <div class="prop-row">
-          <span class="prop-label">WCAG 2.1 (vs #FFF)</span>
-          <span id="inspect-wcag" class="prop-val">4.56:1</span>
-        </div>
-      </div>
+                  // Variant Switching
+                  document.querySelectorAll('.variant-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                      document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('is-active'));
+                      btn.classList.add('is-active');
+                      state.activeVariant = btn.getAttribute('data-variant');
+                      applyVariantAndMode();
+                    });
+                  });
 
-      <div>
-        <div class="section-title">Production Usage</div>
-        <div class="code-block">// Angular Standalone (Signals + CVA)
-&lt;madelixa-color-picker
-  [(ngModel)]="brandColor"
-  format="oklch"
-  [minContrastRatio]="4.5"
-/&gt;
+                  // Mode Switching (Popover vs Inline)
+                  document.querySelectorAll('[data-mode]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                      document.querySelectorAll('[data-mode]').forEach(b => b.classList.remove('is-active'));
+                      btn.classList.add('is-active');
+                      state.displayMode = btn.getAttribute('data-mode');
+                      applyVariantAndMode();
+                    });
+                  });
 
-// React 18+ (Compound Components)
-&lt;ColorPicker.Root value={color}&gt;
-  &lt;ColorPicker.Trigger /&gt;
-  &lt;ColorPicker.Popover&gt;
-    &lt;ColorPicker.Canvas /&gt;
-    &lt;ColorPicker.Sliders /&gt;
-  &lt;/ColorPicker.Popover&gt;
-&lt;/ColorPicker.Root&gt;</div>
-      </div>
-    </div>
+                  function applyVariantAndMode() {
+                    const isInline = state.displayMode === 'inline';
+                    const variant = state.activeVariant;
 
-  </div>
+                    variantLabel.innerText = `${variant.charAt(0).toUpperCase() + variant.slice(1)} Picker (${isInline ? 'Inline' : 'Popover'})`;
 
-  <script type="module">
-    import {
-      rgbToOklch,
-      oklchToRgb,
-      rgbToHex,
-      hexToRgb,
-      getRelativeLuminance,
-      calculateWcagRatio,
-      autoFixContrast,
-      formatColor,
-      generateHarmonies,
-      generateTailwindScale,
-      toCssVariables
-    } from '../packages/core/src/index.ts';
+                    // Trigger visibility
+                    demoTrigger.style.display = isInline ? 'none' : 'inline-flex';
 
-    // Application State
-    const state = {
-      l: 0.623,
-      c: 0.214,
-      h: 217.0,
-      alpha: 1.0,
-      format: 'oklch',
-      isOpen: false,
-      activeTab: 'solid'
-    };
+                    // Hide all variant popovers
+                    const popovers = ['chrome', 'sketch', 'compact', 'github', 'swatches'];
+                    popovers.forEach(v => {
+                      const el = document.getElementById(`variant-${v}`);
+                      if (el) {
+                        if (v === variant && (isInline || state.isPopoverOpen)) {
+                          el.style.display = 'flex';
+                          if (isInline) {
+                            el.classList.add('mdx-cp-popover--inline');
+                            el.style.position = 'relative';
+                            el.style.top = 'auto';
+                            el.style.left = 'auto';
+                          } else {
+                            el.classList.remove('mdx-cp-popover--inline');
+                            el.style.position = 'absolute';
+                            el.style.top = 'calc(100% + 8px)';
+                            el.style.left = '0';
+                          }
+                        } else {
+                          el.style.display = 'none';
+                        }
+                      }
+                    });
 
-    // DOM Elements
-    const trigger = document.getElementById('demo-trigger');
-    const popover = document.getElementById('demo-popover');
-    const triggerFill = document.getElementById('trigger-fill');
-    const triggerText = document.getElementById('trigger-text');
-    const previewChipFill = document.getElementById('preview-chip-fill');
-    const previewChipText = document.getElementById('preview-chip-text');
-    const colorCanvas = document.getElementById('color-canvas');
-    const canvasThumb = document.getElementById('canvas-thumb');
-    const canvasWrapper = document.getElementById('canvas-wrapper');
-    const sliderHue = document.getElementById('slider-hue');
-    const sliderAlpha = document.getElementById('slider-alpha');
-    const alphaOverlay = document.getElementById('alpha-gradient-overlay');
-    const formatSelect = document.getElementById('format-select');
-    const colorInput = document.getElementById('color-input');
-    const contrastReadout = document.getElementById('contrast-readout');
-    const badgeAa = document.getElementById('badge-aa');
-    const btnAutofix = document.getElementById('btn-autofix');
-    const inspectOklch = document.getElementById('inspect-oklch');
-    const inspectHex = document.getElementById('inspect-hex');
-    const inspectP3 = document.getElementById('inspect-p3');
-    const inspectWcag = document.getElementById('inspect-wcag');
-    const btnSampleScreen = document.getElementById('btn-sample-screen');
+                    if (variant === 'chrome' && (isInline || state.isPopoverOpen)) {
+                      setTimeout(renderCanvas, 0);
+                    }
 
-    // Popover Toggle
-    trigger.addEventListener('click', (e) => {
-      e.stopPropagation();
-      state.isOpen = !state.isOpen;
-      popover.style.display = state.isOpen ? 'flex' : 'none';
-      if (state.isOpen) {
-        renderCanvas();
-      }
+                    updateCodeSnippet();
+                  }
+
+                  // Popover Trigger handler
+                  demoTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    state.isOpen = !state.isOpen;
+                    popover.style.display = state.isOpen ? 'flex' : 'none';
+                    if (state.isOpen) {
+                      renderCanvas();
+                    }
+                    state.isPopoverOpen = !state.isPopoverOpen;
+                    applyVariantAndMode();
+                  });
+
+                  window.addEventListener('click', (e) => {
+                    if (!popover.contains(e.target) && !trigger.contains(e.target)) {
+                      state.isOpen = false;
+                      popover.style.display = 'none';
+                      if (state.displayMode === 'popover' && state.isPopoverOpen) {
+                        const activePopover = document.getElementById(`variant-${state.activeVariant}`);
+                        if (activePopover && !activePopover.contains(e.target) && !demoTrigger.contains(e.target)) {
+                          state.isPopoverOpen = false;
+                          applyVariantAndMode();
+                        }
+                      }
+                    });
+
+                  // High-DPI Canvas Rendering
+                  // Retina Canvas
+                  function renderCanvas() {
+                    if (!colorCanvas) return;
+                    const dpr = window.devicePixelRatio || 1;
+                    const rect = colorCanvas.getBoundingClientRect();
+                    const w = rect.width || 296;
+                    const w = rect.width || 294;
+                    const h = rect.height || 160;
+
+                    colorCanvas.width = w * dpr;
+                    colorCanvas.height = h * dpr;
+
+                    const ctx = colorCanvas.getContext('2d');
+                    const imgData = ctx.createImageData(colorCanvas.width, colorCanvas.height);
+                    const data = imgData.data;
+                    const totalW = colorCanvas.width;
+                    const totalH = colorCanvas.height;
+                    const hue = state.h;
+
+                    let idx = 0;
+                    for (let y = 0; y < totalH; y++) {
+                      const l = 1.0 - y / totalH;
+                      for (let x = 0; x < totalW; x++) {
+                        const c = (x / totalW) * 0.32;
+                        const rgb = oklchToRgb({ l, c, h: hue, alpha: 1 });
+                        data[idx] = rgb.r;
+                        data[idx + 1] = rgb.g;
+                        data[idx + 2] = rgb.b;
+                        data[idx + 3] = 255;
+                        idx += 4;
+                      }
+                    }
+                    ctx.putImageData(imgData, 0, 0);
+                  }
+
+                  // UI Sync Engine
+                  // Sync UI
+                  function syncUI() {
+                    const rgb = oklchToRgb(state);
+                    const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+                    const lum = getRelativeLuminance(rgb.r, rgb.g, rgb.b);
+                    const contrast = calculateWcagRatio(state, { l: 1.0, c: 0, h: 0, alpha: 1 });
+                    const apca = calculateApcaContrast(state, { l: 1.0, c: 0, h: 0, alpha: 1 });
+
+                    // Thumb
+                    const thumbX = Math.min(Math.max((state.c / 0.32) * 100, 0), 100);
+                    const thumbY = Math.min(Math.max((1.0 - state.l) * 100, 0), 100);
+                    canvasThumb.style.left = `${thumbX}%`;
+                    canvasThumb.style.top = `${thumbY}%`;
+                    canvasThumb.style.backgroundColor = hex;
+                    canvasThumb.style.borderColor = lum > 0.5 ? '#000000' : '#ffffff';
+                    canvasThumb.style.borderColor = lum > 0.5 ? '#18181b' : '#ffffff';
+
+                    // Previews
+                    previewChipFill.style.backgroundColor = hex;
+                    previewChipFill.style.opacity = state.alpha;
+                    previewChipText.innerText = hex;
+                    triggerFill.style.backgroundColor = hex;
+                    triggerFill.style.opacity = state.alpha;
+                    triggerText.innerText = formatColor(state, state.format);
+                    circlePreview.style.backgroundColor = hex;
+                    circlePreview.style.opacity = state.alpha;
+
+                    // Inputs
+                    colorInput.value = formatColor(state, state.format);
+                    sketchHex.value = hex;
+                    sketchR.value = rgb.r;
+                    sketchG.value = rgb.g;
+                    sketchB.value = rgb.b;
+                    compactHexInput.value = hex;
+                    compactSwatchIndicator.style.backgroundColor = hex;
+
+                    // Sliders
+                    sliderHue.value = state.h;
+                    sliderAlpha.value = Math.round(state.alpha * 100);
+                    compactSliderHue.value = state.h;
+                    alphaOverlay.style.background = `linear-gradient(to right, transparent, ${hex})`;
+
+                    // Trigger & Preview Card
+                    triggerFill.style.backgroundColor = hex;
+                    triggerFill.style.opacity = state.alpha;
+                    const displayStr = formatColor(state, state.format);
+                    triggerText.innerText = displayStr;
+                    previewChipFill.style.backgroundColor = hex;
+                    previewChipFill.style.opacity = state.alpha;
+                    previewChipText.innerText = hex;
+                    colorInput.value = displayStr;
+
+                    // Contrast
+                    contrastReadout.innerText = `${contrast}:1`;
+                    if (contrast >= 4.5) {
+                      badgeAa.className = 'mdx-cp-pill mdx-cp-pill-pass';
+                      badgeAa.innerText = 'AA ✓';
+                    } else {
+                      badgeAa.className = 'mdx-cp-pill mdx-cp-pill-fail';
+                      badgeAa.innerText = 'AA ✕';
+                    }
+
+                    // Sidebar Readouts
+                    inspectOklch.innerText = `${(state.l * 100).toFixed(1)}% ${state.c.toFixed(3)} ${state.h.toFixed(1)}`;
+                    inspectHex.innerText = hex;
+                    inspectP3.innerText = formatColor(state, 'p3');
+                    inspectWcag.innerText = `${contrast}:1 ${contrast >= 4.5 ? '(AA Compliant)' : '(Fails AA)'}`;
+                    inspectApca.innerText = `Lc ${Math.round(apca)}`;
+
+                    updateHarmonies();
+                    updateScales();
+                  }
+
+                  // 60fps Pointer Dragging on Canvas
+                  // Pointer Dragging on Canvas
+                  let isDragging = false;
+                  function handlePointer(e) {
+                    const rect = colorCanvas.getBoundingClientRect();
+                    const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                    const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+                    state.c = x * 0.32;
+                    state.l = 1.0 - y;
+                    syncUI();
+                  }
+
+                  canvasWrapper.addEventListener('pointerdown', (e) => {
+                    isDragging = true;
+                    canvasWrapper.setPointerCapture(e.pointerId);
+                    handlePointer(e);
+                  });
+                  canvasWrapper.addEventListener('pointermove', (e) => {
+                    if (!isDragging) return;
+                    requestAnimationFrame(() => handlePointer(e));
+                  });
+                  canvasWrapper.addEventListener('pointerup', (e) => {
+                    isDragging = false;
+                    if (canvasWrapper.hasPointerCapture(e.pointerId)) {
+                      canvasWrapper.releasePointerCapture(e.pointerId);
+                    }
+                  });
+
+                  sliderHue.addEventListener('input', (e) => {
+                    state.h = parseFloat(e.target.value);
+                    renderCanvas();
+                    syncUI();
+                  });
+
+                  compactSliderHue.addEventListener('input', (e) => {
+                    state.h = parseFloat(e.target.value);
+                    renderCanvas();
+                    syncUI();
+                  });
+
+                  sliderAlpha.addEventListener('input', (e) => {
+                    state.alpha = parseFloat(e.target.value) / 100;
+                    syncUI();
+                  });
+
+                  btnAutofix.addEventListener('click', () => {
+                    const fixed = autoFixContrast(state, { l: 1.0, c: 0, h: 0, alpha: 1 }, 4.5);
+                    state.l = fixed.l;
+                    syncUI();
+                  });
+
+                  formatSelect.addEventListener('change', (e) => {
+                    state.format = e.target.value;
+                    syncUI();
+                  });
+
+                  colorInput.addEventListener('change', (e) => {
+                    const val = e.target.value.trim();
+                    if (val.startsWith('#')) {
+                      const rgb = hexToRgb(val);
+                      const oklch = rgbToOklch(rgb.r, rgb.g, rgb.b, rgb.alpha);
+                      state.l = oklch.l;
+                      state.c = oklch.c;
+                      state.h = oklch.h;
+                      renderCanvas();
+                      syncUI();
+                    }
+                  });
+
+                  // Swatches
+                  document.querySelectorAll('.mdx-cp-swatch-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                      const color = e.target.getAttribute('data-color');
+                      // Swatches click listener
+                      document.addEventListener('click', (e) => {
+                        const target = e.target.closest('[data-color]');
+                        if (target) {
+                          const color = target.getAttribute('data-color');
+                          const rgb = hexToRgb(color);
+                          const oklch = rgbToOklch(rgb.r, rgb.g, rgb.b);
+                          state.l = oklch.l;
+                          state.c = oklch.c;
+                          state.h = oklch.h;
+                          renderCanvas();
+                          syncUI();
+                        });
+                    }
     });
 
-    window.addEventListener('click', (e) => {
-      if (!popover.contains(e.target) && !trigger.contains(e.target)) {
-        state.isOpen = false;
-        popover.style.display = 'none';
-      }
-    });
+                  // EyeDropper API
+                  btnSampleScreen.addEventListener('click', async (e) => {
+                    document.getElementById('btn-sample-screen')?.addEventListener('click', async (e) => {
+                      e.stopPropagation();
+                      if ('EyeDropper' in window) {
+                        try {
+                          const eyeDropper = new window.EyeDropper();
+                          const result = await eyeDropper.open();
+                          const rgb = hexToRgb(result.sRGBHex);
+                          const oklch = rgbToOklch(rgb.r, rgb.g, rgb.b);
+                          state.l = oklch.l;
+                          state.c = oklch.c;
+                          state.h = oklch.h;
+                          renderCanvas();
+                          syncUI();
+                        } catch { }
+                      }
+                    });
 
-    // High-DPI Canvas Rendering
-    function renderCanvas() {
-      const dpr = window.devicePixelRatio || 1;
-      const rect = colorCanvas.getBoundingClientRect();
-      const w = rect.width || 296;
-      const h = rect.height || 160;
+                    // Tabs
+                    // Tab mode switching (Solid, Harmonies, Scales)
+                    document.querySelectorAll('.mdx-cp-tab').forEach(tab => {
+                      tab.addEventListener('click', (e) => {
+                        const t = e.target.getAttribute('data-tab');
+                        document.querySelectorAll('.mdx-cp-tab').forEach(b => b.classList.remove('is-active'));
+                        e.target.classList.add('is-active');
 
-      colorCanvas.width = w * dpr;
-      colorCanvas.height = h * dpr;
+                        document.getElementById('panel-solid').style.display = t === 'solid' ? 'flex' : 'none';
+                        document.getElementById('panel-harmonies').style.display = t === 'harmonies' ? 'flex' : 'none';
+                        document.getElementById('panel-scales').style.display = t === 'scales' ? 'flex' : 'none';
 
-      const ctx = colorCanvas.getContext('2d');
-      const imgData = ctx.createImageData(colorCanvas.width, colorCanvas.height);
-      const data = imgData.data;
-      const totalW = colorCanvas.width;
-      const totalH = colorCanvas.height;
-      const hue = state.h;
+                        if (t === 'solid') {
+                          setTimeout(renderCanvas);
+                          setTimeout(renderCanvas, 0);
+                        }
+                      });
+                    });
 
-      let idx = 0;
-      for (let y = 0; y < totalH; y++) {
-        const l = 1.0 - y / totalH;
-        for (let x = 0; x < totalW; x++) {
-          const c = (x / totalW) * 0.32;
-          const rgb = oklchToRgb({ l, c, h: hue, alpha: 1 });
-          data[idx] = rgb.r;
-          data[idx + 1] = rgb.g;
-          data[idx + 2] = rgb.b;
-          data[idx + 3] = 255;
-          idx += 4;
-        }
-      }
-      ctx.putImageData(imgData, 0, 0);
-    }
+                    function updateHarmonies() {
+                      const harmonies = generateHarmonies(state);
+                      const compContainer = document.getElementById('harmonies-comp');
+                      compContainer.innerHTML = harmonies.complementary
+                        .map(c => `<div style="flex:1; border-radius:6px; background:${formatColor(c, 'hex')}; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="applyHue(${c.h})"></div>`)
+                        .join('');
 
-    // UI Sync Engine
-    function syncUI() {
-      const rgb = oklchToRgb(state);
-      const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
-      const lum = getRelativeLuminance(rgb.r, rgb.g, rgb.b);
-      const contrast = calculateWcagRatio(state, { l: 1.0, c: 0, h: 0, alpha: 1 });
+                      const triadContainer = document.getElementById('harmonies-triad');
+                      triadContainer.innerHTML = harmonies.triadic
+                        .map(c => `<div style="flex:1; border-radius:6px; background:${formatColor(c, 'hex')}; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="applyHue(${c.h})"></div>`)
+                        .join('');
 
-      // Thumb
-      const thumbX = Math.min(Math.max((state.c / 0.32) * 100, 0), 100);
-      const thumbY = Math.min(Math.max((1.0 - state.l) * 100, 0), 100);
-      canvasThumb.style.left = `${thumbX}%`;
-      canvasThumb.style.top = `${thumbY}%`;
-      canvasThumb.style.backgroundColor = hex;
-      canvasThumb.style.borderColor = lum > 0.5 ? '#000000' : '#ffffff';
+                      const analogContainer = document.getElementById('harmonies-analog');
+                      analogContainer.innerHTML = harmonies.analogous
+                        .map(c => `<div style="flex:1; border-radius:6px; background:${formatColor(c, 'hex')}; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="applyHue(${c.h})"></div>`)
+                        .join('');
+                      const comp = document.getElementById('harmonies-comp');
+                      if (comp) {
+                        comp.innerHTML = harmonies.complementary
+                          .map(c => `<div style="flex:1; border-radius:6px; background:${formatColor(c, 'hex')}; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" data-color="${formatColor(c, 'hex')}"></div>`)
+                          .join('');
+                      }
+                      const triad = document.getElementById('harmonies-triad');
+                      if (triad) {
+                        triad.innerHTML = harmonies.triadic
+                          .map(c => `<div style="flex:1; border-radius:6px; background:${formatColor(c, 'hex')}; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" data-color="${formatColor(c, 'hex')}"></div>`)
+                          .join('');
+                      }
+                      const analog = document.getElementById('harmonies-analog');
+                      if (analog) {
+                        analog.innerHTML = harmonies.analogous
+                          .map(c => `<div style="flex:1; border-radius:6px; background:${formatColor(c, 'hex')}; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" data-color="${formatColor(c, 'hex')}"></div>`)
+                          .join('');
+                      }
+                    }
 
-      // Sliders
-      sliderHue.value = state.h;
-      sliderAlpha.value = Math.round(state.alpha * 100);
-      alphaOverlay.style.background = `linear-gradient(to right, transparent, ${hex})`;
+                    function updateScales() {
+                      const scale = generateTailwindScale(state);
+                      const container = document.getElementById('scales-container');
+                      container.innerHTML = Object.entries(scale)
+                        .map(([k, c]) => `<div style="border-radius:4px; background:${formatColor(c, 'hex')}; cursor:pointer;" title="${k}: ${formatColor(c, 'hex')}"></div>`)
+                        .join('');
+                      if (container) {
+                        container.innerHTML = Object.entries(scale)
+                          .map(([k, c]) => `<div style="border-radius:4px; background:${formatColor(c, 'hex')}; cursor:pointer;" title="${k}: ${formatColor(c, 'hex')}" data-color="${formatColor(c, 'hex')}"></div>`)
+                          .join('');
+                      }
+                    }
 
-      // Trigger & Preview Card
-      triggerFill.style.backgroundColor = hex;
-      triggerFill.style.opacity = state.alpha;
-      const displayStr = formatColor(state, state.format);
-      triggerText.innerText = displayStr;
-      previewChipFill.style.backgroundColor = hex;
-      previewChipFill.style.opacity = state.alpha;
-      previewChipText.innerText = hex;
-      colorInput.value = displayStr;
+                    window.applyHue = (h) => {
+                      state.h = h;
+                      renderCanvas();
+                      syncUI();
+                    };
 
-      // Contrast
-      contrastReadout.innerText = `${contrast}:1`;
-      if (contrast >= 4.5) {
-        badgeAa.className = 'mdx-cp-pill mdx-cp-pill-pass';
-        badgeAa.innerText = 'AA ✓';
-      } else {
-        badgeAa.className = 'mdx-cp-pill mdx-cp-pill-fail';
-        badgeAa.innerText = 'AA ✕';
-      }
+                    document.getElementById('btn-copy-css-vars').addEventListener('click', () => {
+                      document.getElementById('btn-copy-css-vars')?.addEventListener('click', () => {
+                        const scale = generateTailwindScale(state);
+                        navigator.clipboard.writeText(toCssVariables(scale, 'brand'));
+                      });
 
-      // Sidebar Readouts
-      inspectOklch.innerText = `${(state.l * 100).toFixed(1)}% ${state.c.toFixed(3)} ${state.h.toFixed(1)}`;
-      inspectHex.innerText = hex;
-      inspectP3.innerText = formatColor(state, 'p3');
-      inspectWcag.innerText = `${contrast}:1 ${contrast >= 4.5 ? '(AA Compliant)' : '(Fails AA)'}`;
+                      // Boot
+                      // Code Snippet generator
+                      let activeLang = 'angular';
+                      document.querySelectorAll('.code-tab-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                          document.querySelectorAll('.code-tab-btn').forEach(b => b.classList.remove('is-active'));
+                          btn.classList.add('is-active');
+                          activeLang = btn.getAttribute('data-lang');
+                          updateCodeSnippet();
+                        });
+                      });
 
-      updateHarmonies();
-      updateScales();
-    }
+                      function updateCodeSnippet() {
+                        const v = state.activeVariant;
+                        const isInline = state.displayMode === 'inline';
 
-    // 60fps Pointer Dragging on Canvas
-    let isDragging = false;
-    function handlePointer(e) {
-      const rect = colorCanvas.getBoundingClientRect();
-      const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-      const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
-      state.c = x * 0.32;
-      state.l = 1.0 - y;
-      syncUI();
-    }
+                        if (activeLang === 'angular') {
+                          codeSnippetDisplay.innerText = `// Angular Standalone Component (Drop-in ngx-color-picker)
+import { ${v.charAt(0).toUpperCase() + v.slice(1)}PickerComponent } from '@madelixa/color-angular';
 
-    canvasWrapper.addEventListener('pointerdown', (e) => {
-      isDragging = true;
-      canvasWrapper.setPointerCapture(e.pointerId);
-      handlePointer(e);
-    });
-    canvasWrapper.addEventListener('pointermove', (e) => {
-      if (!isDragging) return;
-      requestAnimationFrame(() => handlePointer(e));
-    });
-    canvasWrapper.addEventListener('pointerup', (e) => {
-      isDragging = false;
-      if (canvasWrapper.hasPointerCapture(e.pointerId)) {
-        canvasWrapper.releasePointerCapture(e.pointerId);
-      }
-    });
+@Component({
+  imports: [${v.charAt(0).toUpperCase() + v.slice(1)}PickerComponent],
+  template: \`
+    <${v}-picker
+      [(color)]="selectedColor"
+      [inline]="${isInline}"
+    />
+  \`
+})`;
+                        } else if (activeLang === 'react') {
+                          codeSnippetDisplay.innerText = `// React 18+ Component
+import { ${v.charAt(0).toUpperCase() + v.slice(1)}Picker } from '@madelixa/color-react';
 
-    sliderHue.addEventListener('input', (e) => {
-      state.h = parseFloat(e.target.value);
-      renderCanvas();
-      syncUI();
-    });
+export function ColorSettings() {
+  const [color, setColor] = useState('#3b82f6');
+  return (
+    <${v.charAt(0).toUpperCase() + v.slice(1)}Picker
+      value={color}
+      onChange={setColor}
+      inline={${isInline}}
+    />
+  );
+}`;
+                        } else {
+                          codeSnippetDisplay.innerText = `<!-- Web Component (Native / Vue / Svelte) -->
+<script type="module" src="@madelixa/color-wc"></script>
 
-    sliderAlpha.addEventListener('input', (e) => {
-      state.alpha = parseFloat(e.target.value) / 100;
-      syncUI();
-    });
+              <madelixa-color-picker variant="${v}" ${isInline ? 'inline' : '' }
+                value="#3b82f6"></madelixa-color-picker>`;
+              }
+              }
 
-    btnAutofix.addEventListener('click', () => {
-      const fixed = autoFixContrast(state, { l: 1.0, c: 0, h: 0, alpha: 1 }, 4.5);
-      state.l = fixed.l;
-      syncUI();
-    });
-
-    formatSelect.addEventListener('change', (e) => {
-      state.format = e.target.value;
-      syncUI();
-    });
-
-    colorInput.addEventListener('change', (e) => {
-      const val = e.target.value.trim();
-      if (val.startsWith('#')) {
-        const rgb = hexToRgb(val);
-        const oklch = rgbToOklch(rgb.r, rgb.g, rgb.b, rgb.alpha);
-        state.l = oklch.l;
-        state.c = oklch.c;
-        state.h = oklch.h;
-        renderCanvas();
-        syncUI();
-      }
-    });
-
-    // Swatches
-    document.querySelectorAll('.mdx-cp-swatch-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const color = e.target.getAttribute('data-color');
-        const rgb = hexToRgb(color);
-        const oklch = rgbToOklch(rgb.r, rgb.g, rgb.b);
-        state.l = oklch.l;
-        state.c = oklch.c;
-        state.h = oklch.h;
-        renderCanvas();
-        syncUI();
-      });
-    });
-
-    // EyeDropper API
-    btnSampleScreen.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      if ('EyeDropper' in window) {
-        try {
-          const eyeDropper = new window.EyeDropper();
-          const result = await eyeDropper.open();
-          const rgb = hexToRgb(result.sRGBHex);
-          const oklch = rgbToOklch(rgb.r, rgb.g, rgb.b);
-          state.l = oklch.l;
-          state.c = oklch.c;
-          state.h = oklch.h;
-          renderCanvas();
-          syncUI();
-        } catch {}
-      }
-    });
-
-    // Tabs
-    document.querySelectorAll('.mdx-cp-tab').forEach(tab => {
-      tab.addEventListener('click', (e) => {
-        const t = e.target.getAttribute('data-tab');
-        document.querySelectorAll('.mdx-cp-tab').forEach(b => b.classList.remove('is-active'));
-        e.target.classList.add('is-active');
-
-        document.getElementById('panel-solid').style.display = t === 'solid' ? 'flex' : 'none';
-        document.getElementById('panel-harmonies').style.display = t === 'harmonies' ? 'flex' : 'none';
-        document.getElementById('panel-scales').style.display = t === 'scales' ? 'flex' : 'none';
-
-        if (t === 'solid') {
-          setTimeout(renderCanvas);
-        }
-      });
-    });
-
-    function updateHarmonies() {
-      const harmonies = generateHarmonies(state);
-      const compContainer = document.getElementById('harmonies-comp');
-      compContainer.innerHTML = harmonies.complementary
-        .map(c => `<div style="flex:1; border-radius:6px; background:${formatColor(c, 'hex')}; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="applyHue(${c.h})"></div>`)
-        .join('');
-
-      const triadContainer = document.getElementById('harmonies-triad');
-      triadContainer.innerHTML = harmonies.triadic
-        .map(c => `<div style="flex:1; border-radius:6px; background:${formatColor(c, 'hex')}; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="applyHue(${c.h})"></div>`)
-        .join('');
-
-      const analogContainer = document.getElementById('harmonies-analog');
-      analogContainer.innerHTML = harmonies.analogous
-        .map(c => `<div style="flex:1; border-radius:6px; background:${formatColor(c, 'hex')}; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="applyHue(${c.h})"></div>`)
-        .join('');
-    }
-
-    function updateScales() {
-      const scale = generateTailwindScale(state);
-      const container = document.getElementById('scales-container');
-      container.innerHTML = Object.entries(scale)
-        .map(([k, c]) => `<div style="border-radius:4px; background:${formatColor(c, 'hex')}; cursor:pointer;" title="${k}: ${formatColor(c, 'hex')}"></div>`)
-        .join('');
-    }
-
-    window.applyHue = (h) => {
-      state.h = h;
-      renderCanvas();
-      syncUI();
-    };
-
-    document.getElementById('btn-copy-css-vars').addEventListener('click', () => {
-      const scale = generateTailwindScale(state);
-      navigator.clipboard.writeText(toCssVariables(scale, 'brand'));
-    });
-
-    // Boot
-    renderCanvas();
-    syncUI();
-  </script>
+              // Init
+              applyVariantAndMode();
+              renderCanvas();
+              syncUI();
+              </script>
 </body>
+
 </html>
