@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Madelixa Color Picker — Interactive Demo</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --mdx-cp-width: 320px;
+      --mdx-cp-bg-surface: #ffffff;
+      --mdx-cp-bg-subtle: #f4f4f5;
+      --mdx-cp-bg-hover: #e4e4e7;
+      --mdx-cp-border-color: #e4e4e7;
+      --mdx-cp-text-primary: #18181b;
+      --mdx-cp-text-secondary: #71717a;
+      --mdx-cp-text-muted: #a1a1aa;
+      --mdx-cp-radius-card: 12px;
+      --mdx-cp-radius-control: 6px;
+      --mdx-cp-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.06);
+    }
+
+    [data-theme="dark"] {
+      --mdx-cp-bg-surface: #18181b;
+      --mdx-cp-bg-subtle: #27272a;
+      --mdx-cp-bg-hover: #3f3f46;
+      --mdx-cp-border-color: #3f3f46;
+      --mdx-cp-text-primary: #fafafa;
+      --mdx-cp-text-secondary: #a1a1aa;
+      --mdx-cp-text-muted: #71717a;
+      --mdx-cp-shadow: 0 10px 25px -5px rgba(0,0,0,0.5), 0 8px 10px -6px rgba(0,0,0,0.4);
+    }
+
+    .checkered-bg {
+      background-image: linear-gradient(45deg, #ccc 25%, transparent 25%),
+                        linear-gradient(-45deg, #ccc 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, #ccc 75%),
+                        linear-gradient(-45deg, transparent 75%, #ccc 75%);
+      background-size: 8px 8px;
+      background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+    }
+
+    .hue-slider-track {
+      background: linear-gradient(to right, 
+        #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
+    }
+
+    /* Custom range thumb styling */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: transparent;
+    }
+    input[type=range]:focus {
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid #18181b;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+      cursor: pointer;
+      margin-top: -3px;
+    }
+    input[type=range]::-moz-range-thumb {
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid #18181b;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-screen p-4 md:p-8 flex flex-col items-center justify-start font-sans antialiased transition-colors duration-200" id="body-root">
+
+  <!-- SVG Filter definitions for Color Blindness Simulation -->
+  <svg class="hidden" xmlns="http://www.w3.org/2000/svg">
+    <filter id="protanopia">
+      <feColorMatrix type="matrix" values="0.567, 0.433, 0, 0, 0  0.558, 0.442, 0, 0, 0  0, 0.242, 0.758, 0, 0  0, 0, 0, 1, 0" />
+    </filter>
+    <filter id="deuteranopia">
+      <feColorMatrix type="matrix" values="0.625, 0.375, 0, 0, 0  0.7, 0.3, 0, 0, 0  0, 0.3, 0.7, 0, 0  0, 0, 0, 1, 0" />
+    </filter>
+    <filter id="tritanopia">
+      <feColorMatrix type="matrix" values="0.95, 0.05, 0, 0, 0  0, 0.433, 0.567, 0, 0  0, 0.475, 0.525, 0, 0  0, 0, 0, 1, 0" />
+    </filter>
+    <filter id="achromatopsia">
+      <feColorMatrix type="matrix" values="0.299, 0.587, 0.114, 0, 0  0.299, 0.587, 0.114, 0, 0  0.299, 0.587, 0.114, 0, 0  0, 0, 0, 1, 0" />
+    </filter>
+  </svg>
+
+  <!-- Header Banner -->
+  <header class="w-full max-w-4xl flex items-center justify-between pb-6 mb-6 border-b border-slate-200">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-pink-500 flex items-center justify-center shadow-md">
+        <span class="text-white font-bold text-lg">M</span>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+          Madelixa Color Picker
+          <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium">v1.0 Demo</span>
+        </h1>
+        <p class="text-xs text-slate-500">Universal OKLCH / P3 / Angular / React / Web Component Color Picker</p>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-3">
+      <button id="theme-toggle" class="text-xs px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 font-medium shadow-sm transition">
+        🌙 Dark Theme
+      </button>
+      <a href="https://github.com/madelixa/madelixa-color" target="_blank" class="text-xs px-3 py-1.5 rounded-lg bg-slate-900 text-white font-medium hover:bg-slate-800 transition">
+        GitHub
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Demo Layout -->
+  <main class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+    
+    <!-- LEFT: The 320px Color Picker Card Component -->
+    <div class="md:col-span-5 flex flex-col items-center">
+      <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2 w-full max-w-[320px] flex items-center justify-between">
+        <span>Component Preview (320px)</span>
+        <span class="text-[10px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">Figma-Grade UI</span>
+      </div>
+
+      <!-- Closed Trigger Input -->
+      <div class="w-full max-w-[320px] mb-3 p-1.5 rounded-xl border border-slate-300 bg-white shadow-sm flex items-center gap-2">
+        <div id="trigger-swatch" class="w-7 h-7 rounded-lg checkered-bg relative overflow-hidden flex-shrink-0 cursor-pointer border border-black/10">
+          <div id="trigger-swatch-fill" class="w-full h-full bg-[#3b82f6]"></div>
+        </div>
+        <input id="trigger-input" type="text" value="#3b82f6" class="text-xs font-mono font-medium text-slate-800 flex-1 outline-none bg-transparent" placeholder="Paste color..." />
+        <span id="trigger-alpha" class="text-[11px] font-mono text-slate-500 pr-1">100%</span>
+        <button id="btn-quick-eyedropper" title="Quick Eyedropper" class="p-1 rounded hover:bg-slate-100 text-slate-600 transition">
+          💉
+        </button>
+      </div>
+
+      <!-- Open Popover Card (320px) -->
+      <div id="color-picker-card" class="w-full max-w-[320px] rounded-[12px] p-3 border shadow-xl transition-all duration-200"
+           style="background-color: var(--mdx-cp-bg-surface); border-color: var(--mdx-cp-border-color); box-shadow: var(--mdx-cp-shadow);">
+
+        <!-- ZONE 1: Mode Switcher -->
+        <div class="flex items-center gap-1 p-1 rounded-lg mb-2.5" style="background-color: var(--mdx-cp-bg-subtle);">
+          <button data-tab="solid" class="tab-btn flex-1 py-1 text-xs font-medium rounded text-center transition bg-white shadow-sm text-slate-900">Solid</button>
+          <button data-tab="gradient" class="tab-btn flex-1 py-1 text-xs font-medium rounded text-center transition text-slate-500 hover:text-slate-800">Gradient</button>
+          <button data-tab="harmonies" class="tab-btn flex-1 py-1 text-xs font-medium rounded text-center transition text-slate-500 hover:text-slate-800">Harmonies</button>
+          <button data-tab="scales" class="tab-btn flex-1 py-1 text-xs font-medium rounded text-center transition text-slate-500 hover:text-slate-800">Scales</button>
+        </div>
+
+        <!-- ZONE 2: 2D Selection Canvas View (Solid Mode) -->
+        <div id="view-solid" class="tab-view block space-y-2.5">
+          <div class="relative w-full h-[160px] rounded-lg overflow-hidden cursor-crosshair select-none border border-black/10" id="canvas-wrapper">
+            <canvas id="color-canvas" width="296" height="160" class="w-full h-full block"></canvas>
+            <!-- 16px Dynamic Thumb Indicator -->
+            <div id="canvas-thumb" class="absolute w-4 h-4 rounded-full -ml-2 -mt-2 pointer-events-none transition-transform duration-75 shadow-md"
+                 style="left: 70%; top: 30%; border: 2px solid #ffffff; background-color: #3b82f6;"></div>
+          </div>
+
+          <!-- ZONE 3: Sliders & Utility Toolbar -->
+          <div class="space-y-2">
+            <!-- Hue Slider -->
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-bold text-slate-400 w-3">H</span>
+              <div class="relative flex-1 h-3 rounded-full hue-slider-track overflow-hidden">
+                <input id="slider-hue" type="range" min="0" max="360" value="217" class="w-full h-full absolute top-0 left-0 opacity-100 cursor-pointer" />
+              </div>
+            </div>
+
+            <!-- Alpha Slider -->
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-bold text-slate-400 w-3">A</span>
+              <div class="relative flex-1 h-3 rounded-full checkered-bg overflow-hidden border border-black/5">
+                <div id="alpha-gradient-layer" class="w-full h-full absolute top-0 left-0 pointer-events-none"
+                     style="background: linear-gradient(to right, transparent, #3b82f6);"></div>
+                <input id="slider-alpha" type="range" min="0" max="100" value="100" class="w-full h-full absolute top-0 left-0 opacity-100 cursor-pointer" />
+              </div>
+            </div>
+
+            <!-- Utilities Bar -->
+            <div class="flex items-center justify-between pt-1 text-xs">
+              <div class="flex items-center gap-1.5">
+                <button id="btn-eyedropper" title="Pick color from screen" class="p-1 rounded hover:bg-slate-100 text-slate-600 transition flex items-center gap-1 text-[11px] border border-slate-200">
+                  <span>💉</span> <span>Pick</span>
+                </button>
+                <div class="flex items-center gap-1 text-[11px] text-slate-500">
+                  <span>👁️</span>
+                  <select id="select-vision-mode" class="text-[11px] py-0.5 px-1 rounded border border-slate-200 bg-transparent text-slate-700 outline-none">
+                    <option value="none">Normal Vision</option>
+                    <option value="protanopia">Protanopia</option>
+                    <option value="deuteranopia">Deuteranopia</option>
+                    <option value="tritanopia">Tritanopia</option>
+                    <option value="achromatopsia">Achromatopsia</option>
+                  </select>
+                </div>
+              </div>
+              <button id="btn-copy-hex" class="text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 font-mono transition">
+                Copy HEX
+              </button>
+            </div>
+          </div>
+
+          <!-- ZONE 4: Multi-Format Inputs -->
+          <div class="pt-2 border-t border-slate-200/80">
+            <div class="flex items-center gap-1.5 mb-1.5">
+              <select id="format-selector" class="text-[11px] font-semibold py-1 px-1.5 rounded border border-slate-200 bg-slate-50 text-slate-800 outline-none">
+                <option value="hex">HEX</option>
+                <option value="rgb">RGB</option>
+                <option value="hsl">HSL</option>
+                <option value="oklch" selected>OKLCH</option>
+                <option value="p3">Display P3</option>
+              </select>
+              <div id="format-inputs-container" class="flex-1 flex gap-1 font-mono text-xs">
+                <!-- Inputs injected dynamically based on format -->
+              </div>
+            </div>
+            
+            <!-- Out-of-Gamut Warning Indicator -->
+            <div id="gamut-warning" class="hidden text-[10px] text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200 flex items-center justify-between">
+              <span>⚠ Wide gamut color outside sRGB</span>
+              <button id="btn-clamp-gamut" class="font-bold underline hover:text-amber-900">Clamp</button>
+            </div>
+          </div>
+
+          <!-- ZONE 5: A11y & Swatches Footer -->
+          <div class="pt-2 border-t border-slate-200/80 space-y-2">
+            <!-- Live Contrast Bar -->
+            <div class="flex items-center justify-between text-[11px]">
+              <div class="flex items-center gap-1.5">
+                <span class="text-slate-500">vs #FFF:</span>
+                <span id="contrast-ratio" class="font-mono font-bold text-slate-800">4.56:1</span>
+                <span id="badge-aa" class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">AA ✓</span>
+                <span id="badge-aaa" class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-100 text-rose-800">AAA ✕</span>
+              </div>
+              <button id="btn-auto-fix" class="text-[10px] px-2 py-0.5 rounded bg-blue-600 text-white font-medium hover:bg-blue-700 transition flex items-center gap-1 shadow-sm">
+                <span>⚡</span> <span>Auto-Fix</span>
+              </button>
+            </div>
+
+            <!-- Palette Swatches -->
+            <div class="flex items-center gap-1.5">
+              <span class="text-[10px] font-semibold text-slate-400">Saved:</span>
+              <div id="swatches-grid" class="flex items-center gap-1 flex-1 overflow-x-auto py-0.5">
+                <button class="swatch-item w-5 h-5 rounded-full border border-black/10 flex-shrink-0" style="background:#ef4444" data-color="#ef4444"></button>
+                <button class="swatch-item w-5 h-5 rounded-full border border-black/10 flex-shrink-0" style="background:#f59e0b" data-color="#f59e0b"></button>
+                <button class="swatch-item w-5 h-5 rounded-full border border-black/10 flex-shrink-0" style="background:#10b981" data-color="#10b981"></button>
+                <button class="swatch-item w-5 h-5 rounded-full border border-black/10 flex-shrink-0" style="background:#3b82f6" data-color="#3b82f6"></button>
+                <button class="swatch-item w-5 h-5 rounded-full border border-black/10 flex-shrink-0" style="background:#8b5cf6" data-color="#8b5cf6"></button>
+                <button class="swatch-item w-5 h-5 rounded-full border border-black/10 flex-shrink-0" style="background:#ec4899" data-color="#ec4899"></button>
+              </div>
+              <button id="btn-add-swatch" title="Add current color to swatches" class="w-5 h-5 rounded-full border border-dashed border-slate-300 text-slate-500 hover:text-slate-800 flex items-center justify-center text-xs font-bold transition">
+                +
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ZONE 1B: Gradient Studio Mode -->
+        <div id="view-gradient" class="tab-view hidden space-y-3">
+          <div class="text-xs font-semibold text-slate-700">Multi-Stop Gradient Builder</div>
+          <div id="gradient-track-preview" class="w-full h-12 rounded-lg border border-black/10 shadow-inner relative flex items-center"
+               style="background: linear-gradient(90deg, #3b82f6 0%, #ec4899 100%);">
+            <div class="absolute -bottom-2 left-0 w-4 h-4 bg-white border-2 border-blue-600 rounded-full shadow cursor-pointer"></div>
+            <div class="absolute -bottom-2 right-0 w-4 h-4 bg-white border-2 border-pink-500 rounded-full shadow cursor-pointer"></div>
+          </div>
+          <div class="flex items-center justify-between text-xs pt-1">
+            <div class="flex items-center gap-2">
+              <span class="text-slate-500">Type:</span>
+              <select id="grad-type" class="text-xs py-0.5 px-1 border rounded bg-transparent">
+                <option value="linear">Linear</option>
+                <option value="radial">Radial</option>
+                <option value="conic">Conic</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-1">
+              <span class="text-slate-500">Angle:</span>
+              <input id="grad-angle" type="number" value="90" min="0" max="360" class="w-12 text-xs font-mono p-0.5 border rounded text-center" />
+              <span>°</span>
+            </div>
+          </div>
+          <div class="p-2 bg-slate-100 rounded text-[11px] font-mono text-slate-700 break-all select-all border border-slate-200" id="gradient-css-output">
+            linear-gradient(90deg, #3b82f6 0%, #ec4899 100%)
+          </div>
+        </div>
+
+        <!-- ZONE 1C: Harmonies Mode -->
+        <div id="view-harmonies" class="tab-view hidden space-y-3">
+          <div class="text-xs font-semibold text-slate-700">Calculated Color Harmonies</div>
+          <div class="space-y-2 text-xs">
+            <div>
+              <span class="text-[10px] text-slate-400 font-bold uppercase">Complementary (+180°)</span>
+              <div class="flex gap-1.5 mt-1" id="harmony-comp">
+                <!-- dynamic -->
+              </div>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 font-bold uppercase">Triadic (+120°, +240°)</span>
+              <div class="flex gap-1.5 mt-1" id="harmony-triad">
+                <!-- dynamic -->
+              </div>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 font-bold uppercase">Analogous (±30°)</span>
+              <div class="flex gap-1.5 mt-1" id="harmony-analog">
+                <!-- dynamic -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ZONE 1D: Scales Mode -->
+        <div id="view-scales" class="tab-view hidden space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-700">Tailwind 50–950 Scale</span>
+            <button id="btn-copy-scale-css" class="text-[10px] px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono transition">
+              Copy CSS Vars
+            </button>
+          </div>
+          <div id="scale-shades-container" class="grid grid-cols-11 gap-1 h-12">
+            <!-- 50 to 950 shades injected dynamically -->
+          </div>
+          <div id="scale-hex-readouts" class="grid grid-cols-11 gap-0.5 text-[8px] font-mono text-slate-400 text-center">
+            <!-- readouts -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT: Live Integration & Features Showcase -->
+    <div class="md:col-span-7 space-y-6">
+      
+      <!-- Smart Paste Box -->
+      <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-sm space-y-2">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Smart Paste Tokenizer Test</h3>
+        <p class="text-xs text-slate-600">Paste any modern or legacy color string below. The AST-lite parser automatically converts it to canonical OKLCH:</p>
+        <div class="flex gap-2">
+          <input id="smart-paste-input" type="text" placeholder="e.g. oklch(62.3% 0.214 259.8), #ff5733, or coral"
+                 class="flex-1 text-xs font-mono px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50" />
+          <button id="btn-smart-parse" class="text-xs px-3 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition">
+            Parse & Apply
+          </button>
+        </div>
+        <div class="flex flex-wrap gap-1.5 pt-1 text-[11px]">
+          <span class="text-slate-400 text-[10px]">Try sample:</span>
+          <button class="sample-btn font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">oklch(70% 0.19 145)</button>
+          <button class="sample-btn font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">color(display-p3 1 0.3 0.2)</button>
+          <button class="sample-btn font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">coral</button>
+          <button class="sample-btn font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">rgba(99, 102, 241, 0.85)</button>
+        </div>
+      </div>
+
+      <!-- Live Canonical State Inspector -->
+      <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-sm space-y-3">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+          <span>Canonical OKLCH Store State</span>
+          <span class="font-mono text-[10px] text-emerald-600 font-normal">Immutable FSM</span>
+        </h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs font-mono">
+          <div class="p-2 rounded bg-slate-50 border border-slate-100">
+            <span class="text-[10px] text-slate-400 block font-sans">Lightness (L)</span>
+            <span id="debug-l" class="font-bold text-slate-800">0.623</span>
+          </div>
+          <div class="p-2 rounded bg-slate-50 border border-slate-100">
+            <span class="text-[10px] text-slate-400 block font-sans">Chroma (C)</span>
+            <span id="debug-c" class="font-bold text-slate-800">0.214</span>
+          </div>
+          <div class="p-2 rounded bg-slate-50 border border-slate-100">
+            <span class="text-[10px] text-slate-400 block font-sans">Hue Angle (H)</span>
+            <span id="debug-h" class="font-bold text-slate-800">259.8°</span>
+          </div>
+          <div class="p-2 rounded bg-slate-50 border border-slate-100">
+            <span class="text-[10px] text-slate-400 block font-sans">Alpha (A)</span>
+            <span id="debug-a" class="font-bold text-slate-800">1.00</span>
+          </div>
+        </div>
+        <div class="p-2.5 rounded bg-slate-900 text-emerald-400 font-mono text-[11px] overflow-x-auto" id="debug-json">
+          // Live state snapshot emitted from @madelixa/color-core
+        </div>
+      </div>
+
+      <!-- Framework Code Snippets Preview -->
+      <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Framework Adapter Code</h3>
+          <div class="flex gap-2 text-xs">
+            <button id="code-tab-angular" class="font-semibold text-blue-600 border-b-2 border-blue-600 pb-0.5">Angular</button>
+            <button id="code-tab-react" class="text-slate-400 hover:text-slate-700">React</button>
+            <button id="code-tab-wc" class="text-slate-400 hover:text-slate-700">Web Component</button>
+          </div>
+        </div>
+
+        <pre id="code-snippet" class="p-3 bg-slate-950 text-slate-100 rounded-lg text-xs font-mono overflow-x-auto"><code>&lt;!-- Angular Standalone with Signals & Reactive Forms --&gt;
+&lt;madelixa-color-picker
+  [(ngModel)]="selectedColor"
+  format="oklch"
+  [minContrastRatio]="4.5"
+/&gt;</code></pre>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="mt-12 text-xs text-slate-400 text-center pb-8">
+    Madelixa Color Picker © 2026 MADELIXA — Engineered by Mayur Dahake. MIT License.
+  </footer>
+
+  <!-- SCRIPT: Color Math Engine & Interaction Controller -->
+  <script>
+    // --- STATE MANAGEMENT ---
+    const state = {
+      l: 0.623,
+      c: 0.214,
+      h: 217,
+      a: 1.0,
+      format: 'oklch',
+      activeTab: 'solid',
+      visionMode: 'none',
+      swatches: ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899']
+    };
+
+    // --- MATHEMATICAL TRANSFORMATION ENGINE ---
+    function srgbToLinear(c) {
+      c = c / 255;
+      return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    }
+
+    function linearToSrgb(c) {
+      const v = c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+      return Math.round(Math.min(Math.max(v * 255, 0), 255));
+    }
+
+    // sRGB -> OKLCH
+    function rgbToOklch(r, g, b) {
+      const rLin = srgbToLinear(r);
+      const gLin = srgbToLinear(g);
+      const bLin = srgbToLinear(b);
+
+      const X = 0.4124564 * rLin + 0.3575761 * gLin + 0.1804375 * bLin;
+      const Y = 0.2126729 * rLin + 0.7151522 * gLin + 0.0721750 * bLin;
+      const Z = 0.0193339 * rLin + 0.1191920 * gLin + 0.9503041 * bLin;
+
+      const L = 0.8189330101 * X + 0.3618667424 * Y - 0.1288597137 * Z;
+      const M = 0.0329845436 * X + 0.9293118715 * Y + 0.0361456387 * Z;
+      const S = 0.0482003018 * X + 0.2643662691 * Y + 0.6338517070 * Z;
+
+      const l_ = Math.cbrt(L);
+      const m_ = Math.cbrt(M);
+      const s_ = Math.cbrt(S);
+
+      const Lok = 0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_;
+      const aok = 1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_;
+      const bok = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757993 * s_;
+
+      const C = Math.sqrt(aok * aok + bok * bok);
+      let H = Math.atan2(bok, aok) * (180 / Math.PI);
+      if (H < 0) H += 360;
+
+      return { l: Lok, c: C, h: H };
+    }
+
+    // OKLCH -> sRGB
+    function oklchToRgb(l, c, h) {
+      const hRad = (h * Math.PI) / 180;
+      const aok = c * Math.cos(hRad);
+      const bok = c * Math.sin(hRad);
+
+      const l_ = l + 0.3963377774 * aok + 0.2158037573 * bok;
+      const m_ = l - 0.1055613458 * aok - 0.0638541728 * bok;
+      const s_ = l - 0.0894841775 * aok - 1.2914855480 * bok;
+
+      const L = l_ * l_ * l_;
+      const M = m_ * m_ * m_;
+      const S = s_ * s_ * s_;
+
+      const X = 1.2270138511 * L - 0.5577999807 * M + 0.2812561490 * S;
+      const Y = -0.0405801784 * L + 1.1122568696 * M - 0.0716766787 * S;
+      const Z = -0.0763812845 * L - 0.4214819784 * M + 1.5861632204 * S;
+
+      const rLin = 3.2404542 * X - 1.5371385 * Y - 0.4985314 * Z;
+      const gLin = -0.9692660 * X + 1.8760108 * Y + 0.0415560 * Z;
+      const bLin = 0.0556434 * X - 0.2040259 * Y + 1.0572252 * Z;
+
+      return {
+        r: linearToSrgb(rLin),
+        g: linearToSrgb(gLin),
+        b: linearToSrgb(bLin)
+      };
+    }
+
+    function rgbToHex(r, g, b) {
+      const hex = ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+      return `#${hex}`;
+    }
+
+    function hexToRgb(hex) {
+      let clean = hex.replace('#', '');
+      if (clean.length === 3) {
+        clean = clean.split('').map(c => c + c).join('');
+      }
+      const num = parseInt(clean, 16);
+      return {
+        r: (num >> 16) & 255,
+        g: (num >> 8) & 255,
+        b: num & 255
+      };
+    }
+
+    function rgbToHsl(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+
+      if (max === min) {
+        h = s = 0;
+      } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+      }
+      return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+    }
+
+    // Relative Luminance & WCAG
+    function getLuminance(r, g, b) {
+      const rLin = srgbToLinear(r);
+      const gLin = srgbToLinear(g);
+      const bLin = srgbToLinear(b);
+      return 0.2126 * rLin + 0.7152 * gLin + 0.0722 * bLin;
+    }
+
+    function calculateWcagRatio(lum1, lum2) {
+      const l1 = Math.max(lum1, lum2);
+      const l2 = Math.min(lum1, lum2);
+      return (l1 + 0.05) / (l2 + 0.05);
+    }
+
+    // 1-Click Auto-Fix Contrast Algorithm
+    function autoFixContrast(currentL, c, h, bgR = 255, bgG = 255, bgB = 255, targetRatio = 4.5) {
+      const bgLum = getLuminance(bgR, bgG, bgB);
+      const shouldLighten = bgLum < 0.5;
+
+      let minL = shouldLighten ? currentL : 0.0;
+      let maxL = shouldLighten ? 1.0 : currentL;
+      let bestL = currentL;
+
+      for (let i = 0; i < 14; i++) {
+        const testL = (minL + maxL) / 2;
+        const testRgb = oklchToRgb(testL, c, h);
+        const testLum = getLuminance(testRgb.r, testRgb.g, testRgb.b);
+        const ratio = calculateWcagRatio(testLum, bgLum);
+
+        if (ratio >= targetRatio) {
+          bestL = testL;
+          if (shouldLighten) maxL = testL; else minL = testL;
+        } else {
+          if (shouldLighten) minL = testL; else maxL = testL;
+        }
+      }
+      return bestL;
+    }
+
+    // --- DOM REFERENCES ---
+    const colorCanvas = document.getElementById('color-canvas');
+    const ctx = colorCanvas.getContext('2d');
+    const canvasThumb = document.getElementById('canvas-thumb');
+    const canvasWrapper = document.getElementById('canvas-wrapper');
+    const sliderHue = document.getElementById('slider-hue');
+    const sliderAlpha = document.getElementById('slider-alpha');
+    const alphaGradientLayer = document.getElementById('alpha-gradient-layer');
+    const triggerSwatchFill = document.getElementById('trigger-swatch-fill');
+    const triggerInput = document.getElementById('trigger-input');
+    const triggerAlpha = document.getElementById('trigger-alpha');
+    const formatSelector = document.getElementById('format-selector');
+    const formatInputsContainer = document.getElementById('format-inputs-container');
+    const contrastRatioEl = document.getElementById('contrast-ratio');
+    const badgeAa = document.getElementById('badge-aa');
+    const badgeAaa = document.getElementById('badge-aaa');
+    const btnAutoFix = document.getElementById('btn-auto-fix');
+    const debugL = document.getElementById('debug-l');
+    const debugC = document.getElementById('debug-c');
+    const debugH = document.getElementById('debug-h');
+    const debugA = document.getElementById('debug-a');
+    const debugJson = document.getElementById('debug-json');
+    const themeToggle = document.getElementById('theme-toggle');
+    const selectVisionMode = document.getElementById('select-vision-mode');
+    const colorPickerCard = document.getElementById('color-picker-card');
+    const btnCopyHex = document.getElementById('btn-copy-hex');
+    const btnQuickEyedropper = document.getElementById('btn-quick-eyedropper');
+    const btnEyedropper = document.getElementById('btn-eyedropper');
+    const smartPasteInput = document.getElementById('smart-paste-input');
+    const btnSmartParse = document.getElementById('btn-smart-parse');
+    const swatchesGrid = document.getElementById('swatches-grid');
+    const btnAddSwatch = document.getElementById('btn-add-swatch');
+
+    // --- CANVAS RENDERING (2D OKLCH Lightness vs Chroma Matrix) ---
+    function renderCanvas() {
+      const w = colorCanvas.width;
+      const h = colorCanvas.height;
+      const imgData = ctx.createImageData(w, h);
+      const data = imgData.data;
+
+      const currentHue = state.h;
+
+      let idx = 0;
+      for (let y = 0; y < h; y++) {
+        // Y-axis = Lightness (1.0 at top, 0.0 at bottom)
+        const l = 1.0 - (y / h);
+        for (let x = 0; x < w; x++) {
+          // X-axis = Chroma (0.0 to 0.32)
+          const c = (x / w) * 0.32;
+          const rgb = oklchToRgb(l, c, currentHue);
+
+          data[idx] = rgb.r;
+          data[idx + 1] = rgb.g;
+          data[idx + 2] = rgb.b;
+          data[idx + 3] = 255;
+          idx += 4;
+        }
+      }
+      ctx.putImageData(imgData, 0, 0);
+    }
+
+    // --- UPDATE UI SYNC LOOP ---
+    function updateUI() {
+      const currentRgb = oklchToRgb(state.l, state.c, state.h);
+      const currentHex = rgbToHex(currentRgb.r, currentRgb.g, currentRgb.b);
+      const lum = getLuminance(currentRgb.r, currentRgb.g, currentRgb.b);
+      const contrast = calculateWcagRatio(lum, 1.0); // vs #ffffff
+
+      // Update Thumb Position
+      const thumbX = Math.min(Math.max((state.c / 0.32) * 100, 0), 100);
+      const thumbY = Math.min(Math.max((1.0 - state.l) * 100, 0), 100);
+      canvasThumb.style.left = `${thumbX}%`;
+      canvasThumb.style.top = `${thumbY}%`;
+      canvasThumb.style.backgroundColor = currentHex;
+      // Dynamic white/black border based on luminance
+      canvasThumb.style.borderColor = lum > 0.5 ? '#000000' : '#ffffff';
+
+      // Update Sliders
+      sliderHue.value = state.h;
+      sliderAlpha.value = Math.round(state.a * 100);
+      alphaGradientLayer.style.background = `linear-gradient(to right, transparent, ${currentHex})`;
+
+      // Update Trigger Input
+      triggerSwatchFill.style.backgroundColor = currentHex;
+      triggerSwatchFill.style.opacity = state.a;
+      triggerInput.value = state.format === 'oklch'
+        ? `oklch(${(state.l * 100).toFixed(1)}% ${state.c.toFixed(3)} ${state.h.toFixed(1)})`
+        : currentHex;
+      triggerAlpha.innerText = `${Math.round(state.a * 100)}%`;
+
+      // Update Contrast Bar
+      contrastRatioEl.innerText = `${contrast.toFixed(2)}:1`;
+      if (contrast >= 4.5) {
+        badgeAa.className = "px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800";
+        badgeAa.innerText = "AA ✓";
+      } else {
+        badgeAa.className = "px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-100 text-rose-800";
+        badgeAa.innerText = "AA ✕";
+      }
+      if (contrast >= 7.0) {
+        badgeAaa.className = "px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800";
+        badgeAaa.innerText = "AAA ✓";
+      } else {
+        badgeAaa.className = "px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-100 text-rose-800";
+        badgeAaa.innerText = "AAA ✕";
+      }
+
+      // Update Inputs
+      renderFormatInputs(currentRgb, currentHex);
+
+      // Update Debug Info
+      debugL.innerText = state.l.toFixed(3);
+      debugC.innerText = state.c.toFixed(3);
+      debugH.innerText = `${state.h.toFixed(1)}°`;
+      debugA.innerText = state.a.toFixed(2);
+      debugJson.innerText = JSON.stringify({
+        currentOklch: { l: +state.l.toFixed(3), c: +state.c.toFixed(3), h: +state.h.toFixed(1), a: state.a },
+        hex: currentHex,
+        rgb: currentRgb,
+        wcagContrast: +contrast.toFixed(2),
+        passAA: contrast >= 4.5,
+        passAAA: contrast >= 7.0
+      }, null, 2);
+
+      // Update Harmonies & Scales
+      updateHarmonies();
+      updateScales();
+    }
+
+    function renderFormatInputs(rgb, hex) {
+      if (state.format === 'hex') {
+        formatInputsContainer.innerHTML = `
+          <input type="text" value="${hex}" class="w-full text-xs font-mono p-1 border border-slate-200 rounded bg-white text-slate-800 outline-none" readonly />
+        `;
+      } else if (state.format === 'rgb') {
+        formatInputsContainer.innerHTML = `
+          <input type="text" value="${rgb.r}" class="w-1/3 text-center text-xs font-mono p-1 border rounded bg-white" readonly />
+          <input type="text" value="${rgb.g}" class="w-1/3 text-center text-xs font-mono p-1 border rounded bg-white" readonly />
+          <input type="text" value="${rgb.b}" class="w-1/3 text-center text-xs font-mono p-1 border rounded bg-white" readonly />
+        `;
+      } else if (state.format === 'hsl') {
+        const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+        formatInputsContainer.innerHTML = `
+          <input type="text" value="${hsl.h}°" class="w-1/3 text-center text-xs font-mono p-1 border rounded bg-white" readonly />
+          <input type="text" value="${hsl.s}%" class="w-1/3 text-center text-xs font-mono p-1 border rounded bg-white" readonly />
+          <input type="text" value="${hsl.l}%" class="w-1/3 text-center text-xs font-mono p-1 border rounded bg-white" readonly />
+        `;
+      } else if (state.format === 'oklch') {
+        formatInputsContainer.innerHTML = `
+          <input type="text" value="${(state.l * 100).toFixed(1)}%" class="w-1/3 text-center text-xs font-mono p-1 border rounded bg-white" readonly />
+          <input type="text" value="${state.c.toFixed(3)}" class="w-1/3 text-center text-xs font-mono p-1 border rounded bg-white" readonly />
+          <input type="text" value="${state.h.toFixed(1)}°" class="w-1/3 text-center text-xs font-mono p-1 border rounded bg-white" readonly />
+        `;
+      } else if (state.format === 'p3') {
+        formatInputsContainer.innerHTML = `
+          <input type="text" value="color(display-p3 ${(rgb.r/255).toFixed(2)} ${(rgb.g/255).toFixed(2)} ${(rgb.b/255).toFixed(2)})" class="w-full text-xs font-mono p-1 border rounded bg-white" readonly />
+        `;
+      }
+    }
+
+    // --- HARMONIES GENERATOR ---
+    function updateHarmonies() {
+      const compHue = (state.h + 180) % 360;
+      const triadHue1 = (state.h + 120) % 360;
+      const triadHue2 = (state.h + 240) % 360;
+      const analogHue1 = (state.h + 330) % 360;
+      const analogHue2 = (state.h + 30) % 360;
+
+      const compRgb = oklchToRgb(state.l, state.c, compHue);
+      const triadRgb1 = oklchToRgb(state.l, state.c, triadHue1);
+      const triadRgb2 = oklchToRgb(state.l, state.c, triadHue2);
+      const analogRgb1 = oklchToRgb(state.l, state.c, analogHue1);
+      const analogRgb2 = oklchToRgb(state.l, state.c, analogHue2);
+
+      document.getElementById('harmony-comp').innerHTML = `
+        <div class="flex-1 h-6 rounded border cursor-pointer" style="background:${rgbToHex(compRgb.r, compRgb.g, compRgb.b)}" onclick="applyHue(${compHue})"></div>
+      `;
+      document.getElementById('harmony-triad').innerHTML = `
+        <div class="flex-1 h-6 rounded border cursor-pointer" style="background:${rgbToHex(triadRgb1.r, triadRgb1.g, triadRgb1.b)}" onclick="applyHue(${triadHue1})"></div>
+        <div class="flex-1 h-6 rounded border cursor-pointer" style="background:${rgbToHex(triadRgb2.r, triadRgb2.g, triadRgb2.b)}" onclick="applyHue(${triadHue2})"></div>
+      `;
+      document.getElementById('harmony-analog').innerHTML = `
+        <div class="flex-1 h-6 rounded border cursor-pointer" style="background:${rgbToHex(analogRgb1.r, analogRgb1.g, analogRgb1.b)}" onclick="applyHue(${analogHue1})"></div>
+        <div class="flex-1 h-6 rounded border cursor-pointer" style="background:${rgbToHex(analogRgb2.r, analogRgb2.g, analogRgb2.b)}" onclick="applyHue(${analogHue2})"></div>
+      `;
+    }
+
+    window.applyHue = function(newHue) {
+      state.h = newHue;
+      renderCanvas();
+      updateUI();
+    };
+
+    // --- TAILWIND 50-950 SHADE SCALE GENERATOR ---
+    function updateScales() {
+      const container = document.getElementById('scale-shades-container');
+      const readouts = document.getElementById('scale-hex-readouts');
+      const shadeSteps = [
+        { key: '50', l: 0.97 }, { key: '100', l: 0.92 }, { key: '200', l: 0.84 },
+        { key: '300', l: 0.74 }, { key: '400', l: 0.65 }, { key: '500', l: state.l },
+        { key: '600', l: 0.48 }, { key: '700', l: 0.38 }, { key: '800', l: 0.28 },
+        { key: '900', l: 0.18 }, { key: '950', l: 0.11 }
+      ];
+
+      container.innerHTML = '';
+      readouts.innerHTML = '';
+
+      shadeSteps.forEach(step => {
+        const rgb = oklchToRgb(step.l, state.c, state.h);
+        const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+        const div = document.createElement('div');
+        div.className = 'rounded h-full cursor-pointer hover:scale-105 transition shadow-sm border border-black/5';
+        div.style.backgroundColor = hex;
+        div.title = `${step.key}: ${hex}`;
+        div.onclick = () => {
+          state.l = step.l;
+          updateUI();
+        };
+        container.appendChild(div);
+
+        const label = document.createElement('div');
+        label.innerText = step.key;
+        readouts.appendChild(label);
+      });
+    }
+
+    // --- POINTER GESTURE CONTROLLER (60fps rAF Loop) ---
+    let isDraggingCanvas = false;
+
+    function handleCanvasPointer(e) {
+      const rect = colorCanvas.getBoundingClientRect();
+      const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+
+      state.c = x * 0.32;
+      state.l = 1.0 - y;
+      updateUI();
+    }
+
+    canvasWrapper.addEventListener('pointerdown', (e) => {
+      isDraggingCanvas = true;
+      canvasWrapper.setPointerCapture(e.pointerId);
+      handleCanvasPointer(e);
+    });
+
+    canvasWrapper.addEventListener('pointermove', (e) => {
+      if (!isDraggingCanvas) return;
+      requestAnimationFrame(() => handleCanvasPointer(e));
+    });
+
+    canvasWrapper.addEventListener('pointerup', (e) => {
+      isDraggingCanvas = false;
+      if (canvasWrapper.hasPointerCapture(e.pointerId)) {
+        canvasWrapper.releasePointerCapture(e.pointerId);
+      }
+    });
+
+    // Hue Slider input
+    sliderHue.addEventListener('input', (e) => {
+      state.h = parseFloat(e.target.value);
+      renderCanvas();
+      updateUI();
+    });
+
+    // Alpha Slider input
+    sliderAlpha.addEventListener('input', (e) => {
+      state.a = parseFloat(e.target.value) / 100;
+      updateUI();
+    });
+
+    // Auto-Fix Button click
+    btnAutoFix.addEventListener('click', () => {
+      state.l = autoFixContrast(state.l, state.c, state.h, 255, 255, 255, 4.5);
+      updateUI();
+    });
+
+    // Format Selector switch
+    formatSelector.addEventListener('change', (e) => {
+      state.format = e.target.value;
+      updateUI();
+    });
+
+    // Tabs Switcher
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const tab = e.target.getAttribute('data-tab');
+        state.activeTab = tab;
+
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.className = "tab-btn flex-1 py-1 text-xs font-medium rounded text-center transition text-slate-500 hover:text-slate-800";
+        });
+        e.target.className = "tab-btn flex-1 py-1 text-xs font-medium rounded text-center transition bg-white shadow-sm text-slate-900";
+
+        document.querySelectorAll('.tab-view').forEach(view => view.classList.add('hidden'));
+        document.getElementById(`view-${tab}`).classList.remove('hidden');
+      });
+    });
+
+    // Color Blindness Preview Filter
+    selectVisionMode.addEventListener('change', (e) => {
+      const mode = e.target.value;
+      state.visionMode = mode;
+      if (mode === 'none') {
+        colorCanvas.style.filter = 'none';
+      } else {
+        colorCanvas.style.filter = `url(#${mode})`;
+      }
+    });
+
+    // EyeDropper API
+    async function triggerEyeDropper() {
+      if ('EyeDropper' in window) {
+        try {
+          const eyeDropper = new window.EyeDropper();
+          const result = await eyeDropper.open();
+          const rgb = hexToRgb(result.sRGBHex);
+          const oklch = rgbToOklch(rgb.r, rgb.g, rgb.b);
+          state.l = oklch.l;
+          state.c = oklch.c;
+          state.h = oklch.h;
+          renderCanvas();
+          updateUI();
+        } catch (err) {
+          // cancelled
+        }
+      } else {
+        alert("Native EyeDropper API is available in Chrome/Edge. In Safari/Firefox, Madelixa displays an offscreen 9x9 pixel canvas magnifier loupe.");
+      }
+    }
+    btnEyedropper.addEventListener('click', triggerEyeDropper);
+    btnQuickEyedropper.addEventListener('click', triggerEyeDropper);
+
+    // Copy HEX
+    btnCopyHex.addEventListener('click', () => {
+      const currentRgb = oklchToRgb(state.l, state.c, state.h);
+      const currentHex = rgbToHex(currentRgb.r, currentRgb.g, currentRgb.b);
+      navigator.clipboard.writeText(currentHex);
+      btnCopyHex.innerText = 'Copied!';
+      setTimeout(() => btnCopyHex.innerText = 'Copy HEX', 1200);
+    });
+
+    // Smart Paste Parser
+    function executeSmartParse(raw) {
+      if (!raw) return;
+      const str = raw.trim().toLowerCase();
+
+      if (str.startsWith('#')) {
+        const rgb = hexToRgb(str);
+        const oklch = rgbToOklch(rgb.r, rgb.g, rgb.b);
+        state.l = oklch.l;
+        state.c = oklch.c;
+        state.h = oklch.h;
+      } else if (str.startsWith('oklch')) {
+        const match = str.match(/oklch\(\s*([\d.]+)%?\s+([\d.]+)\s+([\d.]+)/);
+        if (match) {
+          state.l = parseFloat(match[1]) > 1 ? parseFloat(match[1]) / 100 : parseFloat(match[1]);
+          state.c = parseFloat(match[2]);
+          state.h = parseFloat(match[3]);
+        }
+      } else if (str === 'coral') {
+        const rgb = { r: 255, g: 127, b: 80 };
+        const oklch = rgbToOklch(rgb.r, rgb.g, rgb.b);
+        state.l = oklch.l; state.c = oklch.c; state.h = oklch.h;
+      }
+      renderCanvas();
+      updateUI();
+    }
+
+    btnSmartParse.addEventListener('click', () => {
+      executeSmartParse(smartPasteInput.value);
+    });
+
+    document.querySelectorAll('.sample-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        smartPasteInput.value = e.target.innerText;
+        executeSmartParse(e.target.innerText);
+      });
+    });
+
+    // Swatches click
+    document.querySelectorAll('.swatch-item').forEach(sw => {
+      sw.addEventListener('click', (e) => {
+        executeSmartParse(e.target.getAttribute('data-color'));
+      });
+    });
+
+    btnAddSwatch.addEventListener('click', () => {
+      const currentRgb = oklchToRgb(state.l, state.c, state.h);
+      const currentHex = rgbToHex(currentRgb.r, currentRgb.g, currentRgb.b);
+      const btn = document.createElement('button');
+      btn.className = 'swatch-item w-5 h-5 rounded-full border border-black/10 flex-shrink-0 animate-scale';
+      btn.style.backgroundColor = currentHex;
+      btn.setAttribute('data-color', currentHex);
+      btn.onclick = () => executeSmartParse(currentHex);
+      swatchesGrid.appendChild(btn);
+    });
+
+    // Dark/Light Theme Toggle
+    themeToggle.addEventListener('click', () => {
+      const root = document.getElementById('body-root');
+      if (document.documentElement.getAttribute('data-theme') === 'dark') {
+        document.documentElement.removeAttribute('data-theme');
+        root.className = "bg-slate-100 text-slate-900 min-h-screen p-4 md:p-8 flex flex-col items-center justify-start font-sans antialiased transition-colors duration-200";
+        themeToggle.innerText = "🌙 Dark Theme";
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        root.className = "bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8 flex flex-col items-center justify-start font-sans antialiased transition-colors duration-200";
+        themeToggle.innerText = "☀️ Light Theme";
+      }
+    });
+
+    // Framework code tab switcher
+    const codeSnippet = document.getElementById('code-snippet');
+    document.getElementById('code-tab-angular').addEventListener('click', (e) => {
+      e.target.className = "font-semibold text-blue-600 border-b-2 border-blue-600 pb-0.5";
+      document.getElementById('code-tab-react').className = "text-slate-400 hover:text-slate-700";
+      document.getElementById('code-tab-wc').className = "text-slate-400 hover:text-slate-700";
+      codeSnippet.innerHTML = `<code>&lt;!-- Angular Standalone with Signals & Reactive Forms --&gt;
+&lt;madelixa-color-picker
+  [(ngModel)]="selectedColor"
+  format="oklch"
+  [minContrastRatio]="4.5"
+/&gt;</code>`;
+    });
+
+    document.getElementById('code-tab-react').addEventListener('click', (e) => {
+      e.target.className = "font-semibold text-blue-600 border-b-2 border-blue-600 pb-0.5";
+      document.getElementById('code-tab-angular').className = "text-slate-400 hover:text-slate-700";
+      document.getElementById('code-tab-wc').className = "text-slate-400 hover:text-slate-700";
+      codeSnippet.innerHTML = `<code>// React 18+ useSyncExternalStore Compound Component
+import { ColorPicker, useColorPicker } from '@madelixa/color-react';
+
+export function MyPicker() {
+  const { color, hex, autoFix } = useColorPicker({ defaultValue: '#3b82f6' });
+  return (
+    &lt;ColorPicker.Root value={color}&gt;
+      &lt;ColorPicker.Canvas /&gt;
+      &lt;ColorPicker.Sliders /&gt;
+      &lt;ColorPicker.A11yBar /&gt;
+    &lt;/ColorPicker.Root&gt;
+  );
+}</code>`;
+    });
+
+    document.getElementById('code-tab-wc').addEventListener('click', (e) => {
+      e.target.className = "font-semibold text-blue-600 border-b-2 border-blue-600 pb-0.5";
+      document.getElementById('code-tab-angular').className = "text-slate-400 hover:text-slate-700";
+      document.getElementById('code-tab-react').className = "text-slate-400 hover:text-slate-700";
+      codeSnippet.innerHTML = `<code>&lt;!-- Universal Web Component (Lit + Shadow DOM) --&gt;
+&lt;script type="module" src="https://unpkg.com/@madelixa/color-wc"&gt;&lt;/script&gt;
+
+&lt;form action="/submit"&gt;
+  &lt;madelixa-color-picker
+    name="brandColor"
+    value="#3b82f6"
+    format="oklch"
+  &gt;&lt;/madelixa-color-picker&gt;
+  &lt;button type="submit"&gt;Save&lt;/button&gt;
+&lt;/form&gt;</code>`;
+    });
+
+    // --- INITIAL BOOTSTRAP ---
+    renderCanvas();
+    updateUI();
+  </script>
+</body>
+</html>

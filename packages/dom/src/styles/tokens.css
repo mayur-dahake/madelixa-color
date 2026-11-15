@@ -1,0 +1,56 @@
+/**
+ * Madelixa Color Picker - Design System Tokens
+ * Namespace: --mdx-cp-*
+ */
+
+:root {
+  --mdx-cp-width: 320px;
+  --mdx-cp-bg-surface: #ffffff;
+  --mdx-cp-bg-subtle: #f4f4f5;
+  --mdx-cp-bg-hover: #e4e4e7;
+  --mdx-cp-border-color: #e4e4e7;
+  --mdx-cp-border-subtle: #f4f4f5;
+  --mdx-cp-text-primary: #18181b;
+  --mdx-cp-text-secondary: #71717a;
+  --mdx-cp-text-muted: #a1a1aa;
+  --mdx-cp-font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --mdx-cp-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --mdx-cp-radius-card: 12px;
+  --mdx-cp-radius-control: 6px;
+  --mdx-cp-radius-track: 8px;
+  --mdx-cp-radius-thumb: 50%;
+  --mdx-cp-thumb-size: 16px;
+  --mdx-cp-track-height: 12px;
+  --mdx-cp-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+  --mdx-cp-focus-ring: 0 0 0 2px #3b82f6;
+  --mdx-cp-accent: #3b82f6;
+  --mdx-cp-success: #10b981;
+  --mdx-cp-warning: #f59e0b;
+  --mdx-cp-error: #ef4444;
+}
+
+[data-theme="dark"], .dark {
+  --mdx-cp-bg-surface: #18181b;
+  --mdx-cp-bg-subtle: #27272a;
+  --mdx-cp-bg-hover: #3f3f46;
+  --mdx-cp-border-color: #3f3f46;
+  --mdx-cp-border-subtle: #27272a;
+  --mdx-cp-text-primary: #fafafa;
+  --mdx-cp-text-secondary: #a1a1aa;
+  --mdx-cp-text-muted: #71717a;
+  --mdx-cp-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+}
+
+.mdx-cp-checkered-bg {
+  background-image: linear-gradient(45deg, #ccc 25%, transparent 25%),
+                    linear-gradient(-45deg, #ccc 25%, transparent 25%),
+                    linear-gradient(45deg, transparent 75%, #ccc 75%),
+                    linear-gradient(-45deg, transparent 75%, #ccc 75%);
+  background-size: 8px 8px;
+  background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+}
+
+.mdx-cp-hue-track {
+  background: linear-gradient(to right, 
+    #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
+}

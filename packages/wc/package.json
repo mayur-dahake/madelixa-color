@@ -1,0 +1,36 @@
+{
+  "name": "@madelixa/color-wc",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Form-Associated Web Component for Madelixa Color Picker with Lit and Shadow DOM",
+  "author": "Mayur Dahake <mayur@madelixa.com>",
+  "license": "MIT",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@madelixa/color-core": "workspace:*",
+    "@madelixa/color-dom": "workspace:*",
+    "lit": "^3.2.1"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  }
+}

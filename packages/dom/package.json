@@ -1,0 +1,39 @@
+{
+  "name": "@madelixa/color-dom",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Interaction, pointer gesture, ARIA keyboard navigation, and Floating UI engine for Madelixa Color Picker",
+  "author": "Mayur Dahake <mayur@madelixa.com>",
+  "license": "MIT",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./styles.css": "./dist/index.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@floating-ui/dom": "^1.6.13",
+    "@madelixa/color-core": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.3"
+  }
+}
