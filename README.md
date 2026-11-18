@@ -7,6 +7,8 @@
 [![Monorepo](https://img.shields.io/badge/Turborepo-pnpm-6366f1.svg)](https://turbo.build/)
 [![Bundle Size](https://img.shields.io/badge/Core%20Size-%3C%204.5%20kB%20gzipped-emerald.svg)]()
 [![A11y Compliant](https://img.shields.io/badge/WCAG%202.1-AA%20%2F%20AAA-success.svg)]()
+[![Live Demo](https://img.shields.io/badge/Demo-Live%20Preview-3b82f6?logo=github&logoColor=white)](https://mayur-dahake.github.io/madelixa-color/)
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/mayur-dahake/madelixa-color/tree/main/apps/showcase-react?file=src%2FApp.tsx)
 
 ---
 
@@ -30,11 +32,11 @@ Madelixa Color provides:
 
 | Package | Version | Responsibility | Bundle Size |
 | :--- | :--- | :--- | :--- |
-| **`@madelixa/color-core`** | `0.1.0` | Zero-dependency headless math engine, OKLCH conversions, gamut clamping, WCAG/APCA contrast, Smart Paste, and FSM store. | **< 4.5 kB** gzipped |
-| **`@madelixa/color-dom`** | `0.1.0` | 60fps PointerGestureController with rAF throttling, ARIA keyboard navigation matrix, Floating UI positioning, and `--mdx-cp-*` tokens. | **< 2.5 kB** gzipped |
-| **`@madelixa/color-react`** | `0.1.0` | React 18+ hooks (`useColorPicker` with `useSyncExternalStore` for concurrent rendering safety) and compound components. | **< 2.0 kB** gzipped |
-| **`@madelixa/color-angular`** | `0.1.0` | Standalone Angular component with Signals (`input`, `model`), `ControlValueAccessor` (`[(ngModel)]`, Reactive Forms), `Validator`, and `NgZone.runOutsideAngular` 60fps drag optimization. | **< 2.5 kB** gzipped |
-| **`@madelixa/color-wc`** | `0.1.0` | Form-Associated Custom Element `<madelixa-color-picker>` (Lit + Shadow DOM + ElementInternals) for plain HTML, Vue, Svelte, or legacy pages. | **< 3.5 kB** gzipped |
+| **`@madelixa/color-core`** | `0.1.1` | Zero-dependency headless math engine, OKLCH conversions, gamut clamping, WCAG/APCA contrast, Smart Paste, and FSM store. | **< 4.5 kB** gzipped |
+| **`@madelixa/color-dom`** | `0.1.1` | 60fps PointerGestureController with rAF throttling, ARIA keyboard navigation matrix, Floating UI positioning, and `--mdx-cp-*` tokens. | **< 2.5 kB** gzipped |
+| **`@madelixa/color-react`** | `0.1.1` | React 18+ hooks (`useColorPicker` with `useSyncExternalStore` for concurrent rendering safety), compound components, and drop-in variants (`SketchPicker`, `ChromePicker`, `CompactPicker`, `GithubPicker`). | **< 2.0 kB** gzipped |
+| **`@madelixa/color-angular`** | `0.1.1` | Standalone Angular component with Signals (`input`, `model`), 5 variant styles (`sketch`, `chrome`, `compact`, `github`, `swatches`), `ControlValueAccessor` (`[(ngModel)]`), `ColorPickerControl`, and 60fps drag optimization. | **< 2.5 kB** gzipped |
+| **`@madelixa/color-wc`** | `0.1.1` | Form-Associated Custom Element `<madelixa-color-picker>` (Lit + Shadow DOM + ElementInternals) for plain HTML, Vue, Svelte, or legacy pages. | **< 3.5 kB** gzipped |
 
 ---
 
@@ -129,7 +131,9 @@ All components consume semantic CSS custom properties:
 Run the core verification test suite:
 
 ```bash
-node --experimental-strip-types packages/core/tests/verify.ts
+pnpm run test:verify
+# or run unit tests via Vitest
+pnpm test
 ```
 
 All 25 test suites run with 100% precision:
